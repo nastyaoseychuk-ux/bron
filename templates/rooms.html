@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Кімнати{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Кімнати</h1>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ room.name }}</h5>
+                    <p class="card-text">{{ room.description }}</p>
+                    <p>Ціна за ніч: {{ room.price_per_night }} грн</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
