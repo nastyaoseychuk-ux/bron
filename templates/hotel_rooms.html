@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}Номери — {{ hotel.name }}{% endblock %}
+
+{% block content %}
+
+<style>
+    .rooms-page {
+        background: #f7f8fc;
+        min-height: 80vh;
+        padding: 40px 0 60px;
+    }
+
+    .room-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        height: 100%;
+        border: 1px solid #e9edf4;
+        box-shadow: 0 5px 20px #19294a08;
+        transition: .25s;
+    }
+
+    .room-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px #19294a12;
+    }
+
+    .room-card h3 {
+        font-size: 22px;
+        font-weight: 750;
+    }
+
+    .room-price {
+        color: #29466f;
+        font-size: 23px;
+        font-weight: 800;
+        margin: 18px 0;
+    }
+
+    .room-btn {
+        display: inline-block;
+        background: #29466f;
+        color: white;
+        padding: 11px 17px;
+        border-radius: 9px;
+        text-decoration: none;
+    }
+
+    .room-btn:hover {
+        background: #192e4c;
+        color: white;
+    }
+
+    .room-status {
+        display: inline-block;
+        background: #e4f7eb;
+        color: #197342;
+        padding: 5px 10px;
+        border-radius: 7px;
+        font-size: 13px;
+    }
+
+    .room-unavailable {
+        background: #fde8e8;
+        color: #a52b2b;
+    }
+</style>
+
+<div class="rooms-page">
+    <div class="container">
+
+        <a href="{% url 'hotel' %}"
+           class="text-decoration-none">
+            ← Назад до готелів
+        </a>
+
+        <div class="mt-4 mb-4">
+            <h1 class="fw-bold">{{ hotel.name }}</h1>
+
+            <p class="text-secondary">
+                {{ hotel.location.city }},
+                {{ hotel.location.country }}
+            </p>
+
+            <p>{{ hotel.description }}</p>
+        </div>
+
+        <h2 class="fw-bold mb-4">Доступні номери</h2>
+
+        <div class="row g-4">
+
+            {% for room in rooms %}
+                <div class="col-12 col-md-6 col-lg-4">
+
+                    <div class="room-card">
+
+                        <h3>Номер {{ room.room_number }}</h3>
+
+                        <p class="text-secondary">
+                            {% if room.room_type == 'single' %}
+                                Одномісний номер
+                            {% elif room.room_type == 'double' %}
+                                Двомісний номер
+                            {% elif room.room_type == 'suite' %}
+                                Люкс
+                            {% else %}
+                                {{ room.get_room_type_display }}
+                            {% endif %}
+                        </p>
+
+                        <p>
+                            Кількість гостей:
+                            {{ room.capacity }}
+                        </p>
+
+                        <div class="room-price">
+                            {{ room.price_per_night }} грн
+                            <small class="fs-6 fw-normal">
+                                / ніч
+                            </small>
+                        </div>
+
+                        {% if room.is_available %}
+                            <span class="room-status">
+                                Доступний
+                            </span>
+                        {% else %}
+                            <span class="room-status room-unavailable">
+                                Недоступний
+                            </span>
+                        {% endif %}
+
+                        <div class="mt-4">
+                            <a
+                                href="{% url 'room' room.id %}"
+                                class="room-btn"
+                            >
+                                Детальніше →
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+
+            {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        У цьому готелі поки немає номерів.
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

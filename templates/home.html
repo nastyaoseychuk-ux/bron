@@ -1,57 +1,377 @@
+
 {% extends 'base.html' %}
 
-{% block title %}Готелі{% endblock %}
+{% block title %}StayLux — Знайди свій готель{% endblock %}
 
 {% block content %}
 
-<div class="container mt-4">
-    <h1 class="mb-4">Наші готелі</h1>
+<style>
+    .hotel-page {
+        background: #f7f8fc;
+        min-height: 100vh;
+        padding-bottom: 60px;
+        color: #20263a;
+    }
 
-    <div class="row">
-        {% for hotel in hotels %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    {% for hotel_image in hotel.images.all %}
-                        <img
-                            src="{{ hotel_image.image.url }}"
-                            class="card-img-top"
-                            alt="{{ hotel.name }}"
-                        >
-                        {% empty %}
-                        <p class="p-3">Фотографій поки немає.</p>
-                    {% endfor %}
+    .hero {
+        background: linear-gradient(120deg, #17243e, #354e78);
+        color: white;
+        padding: 65px 30px;
+        border-radius: 0 0 28px 28px;
+        margin-bottom: 40px;
+    }
 
-                    <div class="card-body">
-                        <h5 class="card-title">{{ hotel.name }}</h5>
+    .hero h1 {
+        font-size: clamp(30px, 4vw, 48px);
+        font-weight: 800;
+        margin-bottom: 15px;
+    }
 
-                        <p>{{ hotel.description }}</p>
-                        <p>Країна: {{ hotel.location.country }}</p>
-                        <p>Місто: {{ hotel.location.city }}</p>
-                        <p>Адреса: {{ hotel.location.address }}</p>
-                        <p>Ціна за ніч: {{ hotel.price_per_night }} грн</p>
+    .hero p {
+        color: #dce5f5;
+        font-size: 17px;
+        max-width: 600px;
+    }
 
-                        <h6>Зручності:</h6>
-                        {% for amenity in hotel.amenities.all %}
-                            <span class="badge bg-secondary">
-                                {{ amenity.name }}
-                            </span>
-                        {% empty %}
-                            <p>Інформація про зручності відсутня.</p>
-                        {% endfor %}
+    .hotel-search {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        margin-top: 28px;
+        box-shadow: 0 10px 35px #101c3520;
+    }
 
-                        <p class="mt-3">
-                            <a href="{% url 'room' hotel.id %}" class="btn btn-primary">Переглянути кімнати</a>
-                        </p>
-                        <p class="mt-3"></p>
-                            Кількість кімнат: {{ hotel.rooms.count }}
+    .hotel-search input {
+        width: 100%;
+        padding: 13px 15px;
+        border: 1px solid #e1e5ed;
+        border-radius: 10px;
+        outline: none;
+    }
+
+    .hotel-search input:focus {
+        border-color: #4267a9;
+    }
+
+    .section-heading {
+        margin-bottom: 25px;
+    }
+
+    .section-heading h2 {
+        font-size: 30px;
+        font-weight: 800;
+    }
+
+    .section-heading p {
+        color: #788196;
+    }
+
+    .hotel-card {
+        background: white;
+        border-radius: 18px;
+        overflow: hidden;
+        height: 100%;
+        border: 1px solid #edf0f5;
+        box-shadow: 0 5px 20px #19294a08;
+        transition: transform .25s, box-shadow .25s;
+    }
+
+    .hotel-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 35px #19294a15;
+    }
+
+    .hotel-photo {
+        width: 100%;
+        height: 225px;
+        object-fit: cover;
+        display: block;
+        background: #e9edf5;
+    }
+
+    .hotel-placeholder {
+        height: 225px;
+        background: linear-gradient(135deg, #dce5f2, #b9c9df);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #526784;
+        font-size: 16px;
+    }
+
+    .hotel-card-body {
+        padding: 22px;
+    }
+
+    .hotel-location {
+        color: #788196;
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+
+    .hotel-card h3 {
+        font-size: 21px;
+        font-weight: 750;
+        margin-bottom: 10px;
+    }
+
+    .hotel-description {
+        color: #70798b;
+        font-size: 14px;
+        line-height: 1.7;
+        min-height: 48px;
+    }
+
+    .amenities {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin: 16px 0;
+    }
+
+    .amenity {
+        background: #f0f4fa;
+        color: #455773;
+        padding: 6px 10px;
+        border-radius: 7px;
+        font-size: 12px;
+    }
+
+    .hotel-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        border-top: 1px solid #edf0f5;
+        padding-top: 17px;
+        margin-top: 18px;
+    }
+
+    .price-label {
+        display: block;
+        color: #858da0;
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    .hotel-price {
+        font-size: 21px;
+        font-weight: 800;
+        color: #243b63;
+        white-space: nowrap;
+    }
+
+    .hotel-price small {
+        font-size: 12px;
+        font-weight: 400;
+    }
+
+    .hotel-btn {
+        display: inline-block;
+        text-decoration: none;
+        background: #29466f;
+        color: white;
+        border-radius: 9px;
+        padding: 11px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
+        transition: background .2s;
+    }
+
+    .hotel-btn:hover {
+        background: #192e4c;
+        color: white;
+    }
+
+    .room-count {
+        font-size: 13px;
+        color: #788196;
+        margin-top: 14px;
+    }
+
+    .empty-state {
+        background: white;
+        border-radius: 16px;
+        padding: 45px 20px;
+        text-align: center;
+        color: #788196;
+    }
+
+    @media (max-width: 576px) {
+        .hero {
+            padding: 42px 20px;
+        }
+
+        .hotel-card-body {
+            padding: 18px;
+        }
+
+        .section-heading h2 {
+            font-size: 25px;
+        }
+    }
+</style>
+
+<div class="hotel-page">
+
+    <!-- Головний екран -->
+    <section class="hero">
+        <div class="container">
+            <p>STAYLUX · ГОТЕЛІ ТА ВІДПОЧИНОК</p>
+
+            <h1>Знайди місце,<br>куди захочеться повернутися.</h1>
+
+            <p>
+                Відкрий для себе комфортні готелі, переглянь номери
+                та обери ідеальне місце для своєї наступної подорожі.
+            </p>
+
+            <div class="hotel-search">
+                <input
+                    type="text"
+                    id="hotelSearch"
+                    placeholder="Введи назву готелю або місто..."
+                    aria-label="Пошук готелю за назвою або містом"
+                >
+            </div>
+        </div>
+    </section>
+
+    <!-- Список готелів -->
+    <section class="container">
+        <div class="section-heading">
+            <h2>Популярні готелі</h2>
+            <p>Обирай готель для комфортного відпочинку.</p>
+        </div>
+
+        <div class="row g-4" id="hotelList">
+
+            {% for hotel in hotels %}
+                <div
+                    class="col-12 col-md-6 col-lg-4 hotel-item"
+                    data-name="{{ hotel.name|lower }}"
+                    data-city="{{ hotel.location.city|lower }}"
+                >
+                    <article class="hotel-card">
+
+                        <!-- Фотографія готелю -->
+                        {% with first_image=hotel.images.first %}
+                            {% if first_image %}
+                                <img
+                                    src="{{ first_image.image.url }}"
+                                    class="hotel-photo"
+                                    alt="{{ hotel.name }}"
+                                    loading="lazy"
+                                >
+                            {% else %}
+                                <div class="hotel-placeholder">
+                                    Фотографія відсутня
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+
+                        <div class="hotel-card-body">
+
+                            <div class="hotel-location">
+                                {{ hotel.location.city }},
+                                {{ hotel.location.country }}
+                            </div>
+
+                            <h3>{{ hotel.name }}</h3>
+
+                            <p class="hotel-description">
+                                {{ hotel.description|truncatewords:20 }}
+                            </p>
+
+                            <!-- Зручності -->
+                            <div class="amenities">
+                                {% for amenity in hotel.amenities.all|slice:":4" %}
+                                    <span class="amenity">
+                                        {{ amenity.name }}
+                                    </span>
+                                {% empty %}
+                                    <span class="amenity">
+                                        Інформація уточнюється
+                                    </span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="hotel-bottom">
+                                <div>
+                                    <span class="price-label">
+                                        Вартість за ніч
+                                    </span>
+
+                                    <div class="hotel-price">
+                                        {{ hotel.price_per_night }} 
+                                        <small>грн / ніч</small>
+                                    </div>
+                                </div>
+
+                                <a
+                                    href="{% url 'hotel_rooms' hotel.id %}"
+                                    class="hotel-btn"
+                                >
+                                    Переглянути →
+                                </a>
+                            </div>
+
+                            <div class="room-count">
+                                Номерів у готелі: {{ hotel.rooms.count }}
+                            </div>
+
+                        </div>
+                    </article>
+                </div>
+
+            {% empty %}
+                <div class="col-12">
+                    <div class="empty-state">
+                        <h4>Поки що готелів немає</h4>
+                        <p>
+                            Додай перший готель через панель адміністратора Django.
                         </p>
                     </div>
                 </div>
-            </div>
-        {% empty %}
-            <p>Готелів поки немає.</p>
-        {% endfor %}
-    </div>
+            {% endfor %}
+
+        </div>
+
+        <p id="noResults" class="empty-state mt-4" hidden>
+            За твоїм запитом готелів не знайдено.
+        </p>
+    </section>
+
 </div>
 
+<!-- Пошук готелів без перезавантаження сторінки -->
+<script>
+    const searchInput = document.getElementById('hotelSearch');
+    const hotelItems = document.querySelectorAll('.hotel-item');
+    const noResults = document.getElementById('noResults');
+
+    searchInput.addEventListener('input', function () {
+        const query = this.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        hotelItems.forEach(function (item) {
+            const name = item.dataset.name || '';
+            const city = item.dataset.city || '';
+
+            const matches =
+                name.includes(query) || city.includes(query);
+
+            item.hidden = !matches;
+
+            if (matches) {
+                visibleCount++;
+            }
+        });
+
+        noResults.hidden = visibleCount !== 0;
+    });
+</script>
+
 {% endblock %}
+```

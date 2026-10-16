@@ -82,7 +82,7 @@ class RoomImage(models.Model):
 
 class Review(models.Model):
     hotel = models.ForeignKey(Hotel, on_delete=models.CASCADE, related_name='reviews')
-    rating = models.DecimalField(max_digits=3, decimal_places=1)
+    rating = models.DecimalField(max_digits=2, decimal_places=1)
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
