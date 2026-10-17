@@ -1,0 +1,493 @@
+{% extends 'base.html' %}
+
+{% block title %}Номер {{ room.room_number }} — {{ room.hotel.name }} | StayLux{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --sl-ink: #202b25;
+        --sl-muted: #6f776f;
+        --sl-paper: #f5f2eb;
+        --sl-white: #fffdf8;
+        --sl-green: #29483b;
+        --sl-green-dark: #1c332a;
+        --sl-lime: #d6e2a8;
+        --sl-clay: #c87555;
+        --sl-line: rgba(32, 43, 37, .14);
+    }
+
+    .sl-room-detail {
+        background: var(--sl-paper);
+        color: var(--sl-ink);
+        min-height: 100vh;
+        padding: 30px 0 80px;
+        width: 100vw;
+        max-width: none;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+        overflow: hidden;
+    }
+
+    .sl-room-detail,
+    .sl-room-detail * { box-sizing: border-box; }
+
+    .sl-detail-shell {
+        width: min(1440px, calc(100% - 72px));
+        margin: 0 auto;
+    }
+
+    .sl-detail-back {
+        align-items: center;
+        color: var(--sl-muted);
+        display: inline-flex;
+        font-size: 12px;
+        gap: 12px;
+        text-decoration: none;
+        transition: color .2s ease;
+    }
+    .sl-detail-back span {
+        align-items: center;
+        border: 1px solid var(--sl-line);
+        border-radius: 50%;
+        display: inline-flex;
+        height: 35px;
+        justify-content: center;
+        transition: background .2s, color .2s, transform .2s;
+        width: 35px;
+    }
+    .sl-detail-back:hover { color: var(--sl-green); }
+    .sl-detail-back:hover span {
+        background: var(--sl-green);
+        color: white;
+        transform: translateX(-3px);
+    }
+
+    .sl-detail-heading {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 28px;
+        margin: 34px 0 28px;
+    }
+
+    .sl-detail-eyebrow {
+        align-items: center;
+        color: var(--sl-clay);
+        display: flex;
+        font-size: 10px;
+        font-weight: 800;
+        gap: 10px;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+    }
+    .sl-detail-eyebrow::before {
+        background: currentColor;
+        content: "";
+        height: 1px;
+        width: 27px;
+    }
+
+    .sl-detail-heading h1 {
+        font-size: clamp(46px, 6vw, 82px);
+        font-weight: 500;
+        letter-spacing: -.08em;
+        line-height: .96;
+        margin: 20px 0 13px;
+        overflow-wrap: anywhere;
+    }
+    .sl-detail-heading h1 em {
+        color: var(--sl-green);
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: 400;
+        letter-spacing: -.065em;
+    }
+
+    .sl-detail-location {
+        color: var(--sl-clay);
+        font-size: 11px;
+        font-weight: 750;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+    }
+
+    .sl-detail-status {
+        border: 1px solid rgba(41,72,59,.22);
+        border-radius: 999px;
+        color: var(--sl-green);
+        display: inline-flex;
+        flex-shrink: 0;
+        font-size: 11px;
+        padding: 10px 14px;
+        white-space: nowrap;
+    }
+    .sl-detail-status.unavailable {
+        border-color: rgba(200,117,85,.4);
+        color: #a65336;
+    }
+
+    .sl-detail-layout {
+        display: grid;
+        gap: clamp(30px, 5vw, 72px);
+        grid-template-columns: minmax(0, 1.12fr) minmax(320px, .88fr);
+        align-items: start;
+    }
+
+    .sl-detail-gallery {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .sl-detail-photo {
+        background: #e4e0d6;
+        border-radius: 18px;
+        display: block;
+        height: 260px;
+        object-fit: cover;
+        overflow: hidden;
+        transition: transform .45s ease;
+        width: 100%;
+    }
+    .sl-detail-photo:first-child {
+        grid-column: 1 / -1;
+        height: clamp(340px, 39vw, 560px);
+        border-radius: 23px;
+    }
+
+    .sl-detail-photo-wrap {
+        background: #e4e0d6;
+        border-radius: 18px;
+        min-height: 230px;
+        overflow: hidden;
+    }
+    .sl-detail-photo-wrap:first-child {
+        grid-column: 1 / -1;
+        min-height: 340px;
+        border-radius: 23px;
+    }
+    .sl-detail-photo-wrap img {
+        display: block;
+        height: 100%;
+        min-height: 230px;
+        object-fit: cover;
+        transition: transform .6s cubic-bezier(.2,.7,.2,1);
+        width: 100%;
+    }
+    .sl-detail-photo-wrap:first-child img {
+        min-height: clamp(340px, 39vw, 560px);
+    }
+    .sl-detail-photo-wrap:hover img { transform: scale(1.035); }
+
+    .sl-detail-no-photo {
+        align-items: center;
+        color: var(--sl-muted);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        justify-content: center;
+        min-height: 340px;
+        padding: 30px;
+        text-align: center;
+    }
+    .sl-detail-no-photo span {
+        align-items: center;
+        border: 1px solid rgba(32,43,37,.2);
+        border-radius: 50%;
+        display: flex;
+        font-family: Georgia, serif;
+        font-size: 28px;
+        height: 64px;
+        justify-content: center;
+        width: 64px;
+    }
+    .sl-detail-no-photo p {
+        font-size: 12px;
+        margin: 0;
+    }
+
+    .sl-detail-panel {
+        background: var(--sl-white);
+        border: 1px solid var(--sl-line);
+        border-radius: 22px;
+        padding: clamp(24px, 3.2vw, 40px);
+        position: sticky;
+        top: 24px;
+    }
+    .sl-detail-panel h2 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 31px;
+        font-weight: 400;
+        letter-spacing: -.045em;
+        margin: 0 0 13px;
+    }
+    .sl-detail-description {
+        color: var(--sl-muted);
+        font-size: 13px;
+        line-height: 1.9;
+        margin: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .sl-detail-divider {
+        background: var(--sl-line);
+        height: 1px;
+        margin: 26px 0;
+        width: 100%;
+    }
+
+    .sl-detail-facts {
+        display: grid;
+        gap: 0;
+    }
+    .sl-detail-fact {
+        align-items: center;
+        border-bottom: 1px solid var(--sl-line);
+        display: flex;
+        gap: 18px;
+        justify-content: space-between;
+        padding: 15px 0;
+    }
+    .sl-detail-fact:first-child { padding-top: 0; }
+    .sl-detail-fact:last-child { border-bottom: 0; }
+    .sl-detail-fact span {
+        color: var(--sl-muted);
+        font-size: 12px;
+    }
+    .sl-detail-fact strong {
+        font-size: 12px;
+        font-weight: 650;
+        text-align: right;
+    }
+
+    .sl-detail-price-label {
+        color: var(--sl-muted);
+        font-size: 11px;
+        margin-bottom: 5px;
+    }
+    .sl-detail-price {
+        font-size: clamp(29px, 3vw, 39px);
+        font-weight: 750;
+        letter-spacing: -.065em;
+        line-height: 1.1;
+    }
+    .sl-detail-price small {
+        color: var(--sl-muted);
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: 0;
+    }
+
+    .sl-detail-booking-note {
+        color: var(--sl-muted);
+        font-size: 11px;
+        line-height: 1.7;
+        margin: 12px 0 20px;
+    }
+
+    .sl-detail-booking-btn {
+        align-items: center;
+        background: var(--sl-green);
+        border: 1px solid var(--sl-green);
+        border-radius: 999px;
+        color: white !important;
+        display: flex;
+        font-size: 12px;
+        gap: 20px;
+        justify-content: space-between;
+        padding: 16px 19px;
+        text-decoration: none;
+        transition: background .2s, transform .2s;
+    }
+    .sl-detail-booking-btn:hover {
+        background: var(--sl-green-dark);
+        transform: translateY(-2px);
+    }
+    .sl-detail-booking-btn.disabled {
+        background: #d9d8d0;
+        border-color: #d9d8d0;
+        color: #73786f !important;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .sl-detail-footer-note {
+        align-items: center;
+        background: var(--sl-green);
+        border-radius: 22px;
+        color: var(--sl-white);
+        display: flex;
+        gap: 28px;
+        justify-content: space-between;
+        margin-top: 75px;
+        padding: 30px 36px;
+    }
+    .sl-detail-footer-note h3 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(25px, 3vw, 36px);
+        font-weight: 400;
+        letter-spacing: -.04em;
+        margin: 0;
+    }
+    .sl-detail-footer-note p {
+        color: rgba(255,255,255,.72);
+        font-size: 12px;
+        line-height: 1.8;
+        margin: 0;
+        max-width: 390px;
+    }
+
+    @media (max-width: 900px) {
+        .sl-detail-shell { width: calc(100% - 40px); }
+        .sl-detail-layout {
+            grid-template-columns: minmax(0, 1fr) minmax(270px, .85fr);
+            gap: 24px;
+        }
+        .sl-detail-photo-wrap:first-child img { min-height: 370px; }
+        .sl-detail-photo-wrap:first-child { min-height: 370px; }
+        .sl-detail-photo-wrap { min-height: 190px; }
+        .sl-detail-photo-wrap img { min-height: 190px; }
+        .sl-detail-panel { padding: 24px; }
+    }
+
+    @media (max-width: 680px) {
+        .sl-room-detail { padding-top: 24px; }
+        .sl-detail-shell { width: calc(100% - 30px); }
+        .sl-detail-heading {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 15px;
+            margin: 28px 0 23px;
+        }
+        .sl-detail-heading h1 { font-size: clamp(46px, 12vw, 66px); }
+        .sl-detail-layout { grid-template-columns: 1fr; }
+        .sl-detail-gallery { gap: 9px; }
+        .sl-detail-photo-wrap:first-child,
+        .sl-detail-photo-wrap:first-child img { min-height: 330px; }
+        .sl-detail-photo-wrap,
+        .sl-detail-photo-wrap img { min-height: 180px; }
+        .sl-detail-panel { position: static; padding: 25px 22px; }
+        .sl-detail-footer-note {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 45px;
+            padding: 27px 23px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .sl-room-detail *, .sl-room-detail *::before, .sl-room-detail *::after {
+            animation-duration: .01ms !important;
+            scroll-behavior: auto !important;
+            transition-duration: .01ms !important;
+        }
+    }
+</style>
+
+<div class="sl-room-detail">
+    <div class="sl-detail-shell">
+
+        <a href="{% url 'hotel_rooms' room.hotel.pk %}" class="sl-detail-back">
+            <span aria-hidden="true">←</span>
+            Назад до номерів готелю
+        </a>
+
+        <header class="sl-detail-heading">
+            <div>
+                <div class="sl-detail-eyebrow">Your private space</div>
+                <h1>Номер {{ room.room_number }}<br><em>для твого відпочинку.</em></h1>
+                <div class="sl-detail-location">
+                    {{ room.hotel.name }} · {{ room.hotel.location.city }}, {{ room.hotel.location.country }}
+                </div>
+            </div>
+
+            {% if room.is_available %}
+                <span class="sl-detail-status">● Доступний для бронювання</span>
+            {% else %}
+                <span class="sl-detail-status unavailable">● Наразі недоступний</span>
+            {% endif %}
+        </header>
+
+        <main class="sl-detail-layout">
+            <section class="sl-detail-gallery" aria-label="Фотографії номера">
+                {% for photo in room.images.all %}
+                    <div class="sl-detail-photo-wrap">
+                        <img
+                            src="{{ photo.image.url }}"
+                            alt="Фото номера {{ room.room_number }} у готелі {{ room.hotel.name }}"
+                            loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                        >
+                    </div>
+                {% empty %}
+                    <div class="sl-detail-photo-wrap">
+                        <div class="sl-detail-no-photo">
+                            <span aria-hidden="true">⌂</span>
+                            <p>Фотографії цього номера поки не додані.</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </section>
+
+            <aside class="sl-detail-panel">
+                <div class="sl-detail-eyebrow">The details</div>
+                <h2>Твій простір.</h2>
+                <p class="sl-detail-description">
+                    {% if room.description %}
+                        {{ room.description }}
+                    {% else %}
+                        Затишний простір для комфортного перебування. Дізнайся більше про умови проживання в цьому номері.
+                    {% endif %}
+                </p>
+
+                <div class="sl-detail-divider"></div>
+
+                <h2 style="font-size:25px; margin-bottom:14px;">Параметри номера</h2>
+                <div class="sl-detail-facts">
+                    <div class="sl-detail-fact">
+                        <span>Тип номера</span>
+                        <strong>{{ room.get_room_type_display }}</strong>
+                    </div>
+                    <div class="sl-detail-fact">
+                        <span>Кількість гостей</span>
+                        <strong>{{ room.capacity }}</strong>
+                    </div>
+                    <div class="sl-detail-fact">
+                        <span>Готель</span>
+                        <strong>{{ room.hotel.name }}</strong>
+                    </div>
+                    <div class="sl-detail-fact">
+                        <span>Місто</span>
+                        <strong>{{ room.hotel.location.city }}</strong>
+                    </div>
+                </div>
+
+                <div class="sl-detail-divider"></div>
+
+                <div class="sl-detail-price-label">Вартість проживання</div>
+                <div class="sl-detail-price">
+                    {{ room.price_per_night }} <small>грн / ніч</small>
+                </div>
+                <p class="sl-detail-booking-note">
+                    Ціна вказана за одну ніч. Умови та дати проживання можна уточнити під час бронювання.
+                </p>
+
+                {% if room.is_available %}
+                    <a href="{% url 'hotel_rooms' room.hotel.pk %}" class="sl-detail-booking-btn">
+                        Обрати номер <span aria-hidden="true">↗</span>
+                    </a>
+                {% else %}
+                    <span class="sl-detail-booking-btn disabled">
+                        Номер недоступний <span aria-hidden="true">—</span>
+                    </span>
+                {% endif %}
+            </aside>
+        </main>
+
+        <aside class="sl-detail-footer-note">
+            <h3>Трохи часу.<br>Повністю для себе.</h3>
+            <p>Твоя подорож складається з деталей. Нехай цей простір стане тією частиною відпочинку, яку захочеться згадувати.</p>
+        </aside>
+
+    </div>
+</div>
+{% endblock %}

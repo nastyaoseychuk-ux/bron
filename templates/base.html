@@ -8,12 +8,38 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
-<body>
-<div class="container mt-4">
-    {% block content %}
+<body class="staylux-body">
+{% include 'menu.html' %}
 
-    {% endblock %}
-</div>
+<main class="staylux-main">
+    {% block content %}{% endblock %}
+</main>
+
+<style>
+    html {
+        margin: 0;
+        padding: 0;
+        background: #f5f2eb;
+    }
+
+    body.staylux-body {
+        margin: 0;
+        padding: 0;
+        background: #f5f2eb;
+        color: #202b25;
+    }
+
+    /* Не додаємо контейнеру глобальні mt-4 / padding:
+       кожна сторінка керує власними відступами самостійно. */
+    .staylux-main {
+        display: flow-root;
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
 </body>
 </html>

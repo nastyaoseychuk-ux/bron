@@ -1,158 +1,614 @@
 {% extends 'base.html' %}
 
-{% block title %}Номери — {{ hotel.name }}{% endblock %}
+{% block title %}Номери — {{ hotel.name }} | StayLux{% endblock %}
 
 {% block content %}
-
 <style>
-    .rooms-page {
-        background: #f7f8fc;
-        min-height: 80vh;
-        padding: 40px 0 60px;
+    :root {
+        --sl-ink: #202b25;
+        --sl-muted: #6f776f;
+        --sl-paper: #f5f2eb;
+        --sl-white: #fffdf8;
+        --sl-green: #29483b;
+        --sl-green-dark: #1c332a;
+        --sl-lime: #d6e2a8;
+        --sl-clay: #c87555;
+        --sl-line: rgba(32, 43, 37, .14);
     }
 
-    .room-card {
-        background: white;
-        border-radius: 16px;
-        padding: 24px;
+    .sl-rooms-page {
+        background: var(--sl-paper);
+        color: var(--sl-ink);
+        min-height: 100vh;
+        padding: 34px 0 80px;
+        width: 100vw;
+        max-width: none;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+        overflow: hidden;
+    }
+
+    .sl-rooms-page,
+    .sl-rooms-page * { box-sizing: border-box; }
+
+    .sl-rooms-shell {
+        width: min(1440px, calc(100% - 72px));
+        margin: 0 auto;
+    }
+
+    .sl-rooms-back {
+        align-items: center;
+        color: var(--sl-muted);
+        display: inline-flex;
+        font-size: 12px;
+        gap: 12px;
+        text-decoration: none;
+        transition: color .2s ease;
+    }
+    .sl-rooms-back span {
+        align-items: center;
+        border: 1px solid var(--sl-line);
+        border-radius: 50%;
+        display: inline-flex;
+        height: 34px;
+        justify-content: center;
+        transition: background .2s, color .2s, transform .2s;
+        width: 34px;
+    }
+    .sl-rooms-back:hover { color: var(--sl-green); }
+    .sl-rooms-back:hover span {
+        background: var(--sl-green);
+        color: white;
+        transform: translateX(-3px);
+    }
+
+    .sl-rooms-hero {
+        display: grid;
+        gap: clamp(30px, 5vw, 75px);
+        grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+        margin: 32px 0 76px;
+    }
+
+    .sl-rooms-intro {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 12px 0;
+    }
+
+    .sl-rooms-eyebrow {
+        align-items: center;
+        color: var(--sl-clay);
+        display: flex;
+        font-size: 10px;
+        font-weight: 800;
+        gap: 10px;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+    }
+    .sl-rooms-eyebrow::before {
+        background: currentColor;
+        content: "";
+        height: 1px;
+        width: 27px;
+    }
+
+    .sl-rooms-intro h1 {
+        font-size: clamp(46px, 6vw, 82px);
+        font-weight: 500;
+        letter-spacing: -.08em;
+        line-height: .96;
+        margin: 25px 0 19px;
+        overflow-wrap: anywhere;
+    }
+    .sl-rooms-intro h1 em {
+        color: var(--sl-green);
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: 400;
+        letter-spacing: -.065em;
+    }
+
+    .sl-rooms-location {
+        color: var(--sl-clay);
+        font-size: 11px;
+        font-weight: 750;
+        letter-spacing: .1em;
+        margin-bottom: 18px;
+        text-transform: uppercase;
+    }
+
+    .sl-rooms-description {
+        color: var(--sl-muted);
+        font-size: 14px;
+        line-height: 1.9;
+        max-width: 480px;
+        white-space: normal;
+    }
+
+    .sl-rooms-facts {
+        border-top: 1px solid var(--sl-line);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 26px;
+        margin-top: 27px;
+        padding-top: 18px;
+    }
+    .sl-rooms-fact strong {
+        display: block;
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: -.05em;
+    }
+    .sl-rooms-fact span {
+        color: var(--sl-muted);
+        display: block;
+        font-size: 10px;
+        margin-top: 4px;
+    }
+
+    .sl-rooms-visual {
+        background: #e1ddd2;
+        border-radius: 48% 48% 18px 18px;
+        min-height: 480px;
+        overflow: hidden;
+        position: relative;
+    }
+    .sl-rooms-visual img {
         height: 100%;
-        border: 1px solid #e9edf4;
-        box-shadow: 0 5px 20px #19294a08;
-        transition: .25s;
+        inset: 0;
+        object-fit: cover;
+        position: absolute;
+        width: 100%;
+    }
+    .sl-rooms-visual::after {
+        background: linear-gradient(180deg, transparent 45%, rgba(16, 27, 21, .6));
+        content: "";
+        inset: 0;
+        pointer-events: none;
+        position: absolute;
+    }
+    .sl-rooms-visual-caption {
+        bottom: 25px;
+        color: white;
+        left: 27px;
+        position: absolute;
+        right: 27px;
+        z-index: 1;
+    }
+    .sl-rooms-visual-caption span {
+        display: block;
+        font-size: 10px;
+        letter-spacing: .15em;
+        margin-bottom: 7px;
+        text-transform: uppercase;
+    }
+    .sl-rooms-visual-caption strong {
+        display: block;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(27px, 3vw, 42px);
+        font-weight: 400;
+        letter-spacing: -.04em;
     }
 
-    .room-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 28px #19294a12;
+    .sl-rooms-heading {
+        align-items: end;
+        display: flex;
+        gap: 25px;
+        justify-content: space-between;
+        margin-bottom: 29px;
+    }
+    .sl-rooms-heading h2 {
+        font-size: clamp(36px, 4.5vw, 60px);
+        font-weight: 500;
+        letter-spacing: -.075em;
+        line-height: 1;
+        margin: 13px 0 0;
+    }
+    .sl-rooms-heading h2 em {
+        color: var(--sl-green);
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: 400;
+    }
+    .sl-rooms-heading p {
+        color: var(--sl-muted);
+        font-size: 12px;
+        line-height: 1.8;
+        margin: 0;
+        max-width: 280px;
     }
 
-    .room-card h3 {
+    .sl-room-grid {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: start;
+    }
+
+    .sl-room-card {
+        min-width: 0;
+        padding-bottom: 20px;
+    }
+    .sl-room-card:nth-child(3n + 2) { margin-top: 35px; }
+
+    .sl-room-gallery {
+        background: #e4e0d6;
+        border-radius: 19px;
+        height: 300px;
+        overflow: hidden;
+        position: relative;
+    }
+    .sl-room-gallery img {
+        display: block;
+        height: 100%;
+        object-fit: cover;
+        transition: transform .6s cubic-bezier(.2,.7,.2,1);
+        width: 100%;
+    }
+    .sl-room-card:hover .sl-room-gallery img { transform: scale(1.045); }
+
+    .sl-room-gallery-empty {
+        align-items: center;
+        color: var(--sl-muted);
+        display: flex;
+        flex-direction: column;
+        font-size: 12px;
+        gap: 10px;
+        height: 100%;
+        justify-content: center;
+        padding: 20px;
+        text-align: center;
+    }
+    .sl-room-gallery-empty span {
+        align-items: center;
+        border: 1px solid rgba(32,43,37,.2);
+        border-radius: 50%;
+        display: flex;
+        font-family: Georgia, serif;
+        font-size: 25px;
+        height: 58px;
+        justify-content: center;
+        width: 58px;
+    }
+
+    .sl-room-index {
+        align-items: center;
+        backdrop-filter: blur(10px);
+        background: rgba(255,253,248,.9);
+        border-radius: 999px;
+        display: flex;
+        font-size: 10px;
+        height: 36px;
+        justify-content: center;
+        left: 13px;
+        position: absolute;
+        top: 13px;
+        width: 48px;
+    }
+
+    .sl-room-content { padding: 18px 3px 0; }
+    .sl-room-kicker {
+        color: var(--sl-clay);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .12em;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+    }
+    .sl-room-content h3 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 28px;
+        font-weight: 400;
+        letter-spacing: -.045em;
+        margin: 0 0 9px;
+    }
+    .sl-room-type {
+        color: var(--sl-muted);
+        font-size: 12px;
+        margin: 0 0 17px;
+    }
+
+    .sl-room-meta {
+        align-items: center;
+        border-bottom: 1px solid var(--sl-line);
+        border-top: 1px solid var(--sl-line);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 20px;
+        padding: 13px 0;
+    }
+    .sl-room-meta span {
+        align-items: center;
+        color: var(--sl-muted);
+        display: inline-flex;
+        font-size: 11px;
+        gap: 7px;
+    }
+    .sl-room-meta b {
+        color: var(--sl-ink);
+        font-weight: 650;
+    }
+
+    .sl-room-bottom {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: space-between;
+        padding-top: 16px;
+    }
+    .sl-room-price-caption {
+        color: var(--sl-muted);
+        display: block;
+        font-size: 10px;
+        margin-bottom: 4px;
+    }
+    .sl-room-price {
         font-size: 22px;
         font-weight: 750;
+        letter-spacing: -.05em;
+        white-space: nowrap;
+    }
+    .sl-room-price small {
+        color: var(--sl-muted);
+        font-size: 10px;
+        font-weight: 400;
+        letter-spacing: 0;
     }
 
-    .room-price {
-        color: #29466f;
-        font-size: 23px;
-        font-weight: 800;
-        margin: 18px 0;
+    .sl-room-status {
+        border: 1px solid rgba(41,72,59,.22);
+        border-radius: 999px;
+        color: var(--sl-green);
+        display: inline-flex;
+        font-size: 10px;
+        padding: 7px 10px;
+        white-space: nowrap;
+    }
+    .sl-room-status.unavailable {
+        border-color: rgba(200,117,85,.4);
+        color: #a65336;
     }
 
-    .room-btn {
-        display: inline-block;
-        background: #29466f;
-        color: white;
-        padding: 11px 17px;
-        border-radius: 9px;
+    .sl-room-btn {
+        align-items: center;
+        background: var(--sl-green);
+        border: 1px solid var(--sl-green);
+        border-radius: 999px;
+        color: white !important;
+        display: inline-flex;
+        font-size: 11px;
+        gap: 20px;
+        justify-content: space-between;
+        margin-top: 16px;
+        padding: 13px 17px;
         text-decoration: none;
+        transition: background .2s, transform .2s;
+    }
+    .sl-room-btn:hover {
+        background: var(--sl-green-dark);
+        transform: translateY(-2px);
     }
 
-    .room-btn:hover {
-        background: #192e4c;
-        color: white;
+    .sl-rooms-empty {
+        background: var(--sl-white);
+        border: 1px dashed var(--sl-line);
+        border-radius: 20px;
+        grid-column: 1 / -1;
+        padding: 58px 24px;
+        text-align: center;
     }
-
-    .room-status {
-        display: inline-block;
-        background: #e4f7eb;
-        color: #197342;
-        padding: 5px 10px;
-        border-radius: 7px;
+    .sl-rooms-empty h3 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 30px;
+        font-weight: 400;
+        margin: 16px 0 8px;
+    }
+    .sl-rooms-empty p {
+        color: var(--sl-muted);
         font-size: 13px;
+        margin: 0;
     }
 
-    .room-unavailable {
-        background: #fde8e8;
-        color: #a52b2b;
+    .sl-rooms-note {
+        align-items: center;
+        background: var(--sl-green);
+        border-radius: 22px;
+        color: var(--sl-white);
+        display: flex;
+        gap: 30px;
+        justify-content: space-between;
+        margin-top: 70px;
+        padding: 31px 36px;
+    }
+    .sl-rooms-note h3 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(25px, 3vw, 36px);
+        font-weight: 400;
+        letter-spacing: -.04em;
+        margin: 0;
+    }
+    .sl-rooms-note p {
+        color: rgba(255,255,255,.72);
+        font-size: 12px;
+        line-height: 1.8;
+        margin: 0;
+        max-width: 390px;
+    }
+
+    @media (max-width: 900px) {
+        .sl-rooms-shell { width: calc(100% - 40px); }
+        .sl-rooms-hero { grid-template-columns: 1fr 1fr; gap: 28px; }
+        .sl-rooms-visual { min-height: 410px; }
+        .sl-room-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .sl-room-card:nth-child(3n + 2) { margin-top: 0; }
+        .sl-room-card:nth-child(even) { margin-top: 30px; }
+        .sl-room-gallery { height: 270px; }
+    }
+
+    @media (max-width: 640px) {
+        .sl-rooms-page { padding-top: 24px; }
+        .sl-rooms-shell { width: calc(100% - 30px); }
+        .sl-rooms-hero { display: flex; flex-direction: column; gap: 25px; margin: 25px 0 60px; }
+        .sl-rooms-intro h1 { font-size: clamp(48px, 13vw, 68px); }
+        .sl-rooms-visual { min-height: 370px; }
+        .sl-rooms-heading { align-items: start; flex-direction: column; gap: 14px; }
+        .sl-rooms-heading h2 { font-size: 42px; }
+        .sl-room-grid { grid-template-columns: 1fr; gap: 28px; }
+        .sl-room-card:nth-child(even) { margin-top: 0; }
+        .sl-room-gallery { height: clamp(270px, 78vw, 410px); }
+        .sl-room-content h3 { font-size: 30px; }
+        .sl-rooms-note { align-items: flex-start; flex-direction: column; gap: 12px; margin-top: 45px; padding: 27px 23px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .sl-rooms-page *, .sl-rooms-page *::before, .sl-rooms-page *::after {
+            animation-duration: .01ms !important;
+            scroll-behavior: auto !important;
+            transition-duration: .01ms !important;
+        }
     }
 </style>
 
-<div class="rooms-page">
-    <div class="container">
+<div class="sl-rooms-page">
+    <div class="sl-rooms-shell">
 
-        <a href="{% url 'hotel' %}"
-           class="text-decoration-none">
-            ← Назад до готелів
+        <a href="{% url 'hotel' %}" class="sl-rooms-back">
+            <span aria-hidden="true">←</span>
+            Повернутися до колекції
         </a>
 
-        <div class="mt-4 mb-4">
-            <h1 class="fw-bold">{{ hotel.name }}</h1>
+        <section class="sl-rooms-hero">
+            <div class="sl-rooms-intro">
+                <div class="sl-rooms-eyebrow">The place to stay</div>
 
-            <p class="text-secondary">
-                {{ hotel.location.city }},
-                {{ hotel.location.country }}
-            </p>
+                <h1>{{ hotel.name }}<br><em>у твоєму ритмі.</em></h1>
 
-            <p>{{ hotel.description }}</p>
-        </div>
+                <div class="sl-rooms-location">
+                    {{ hotel.location.city }}, {{ hotel.location.country }}
+                </div>
 
-        <h2 class="fw-bold mb-4">Доступні номери</h2>
+                <div class="sl-rooms-description">
+                    {{ hotel.description }}
+                </div>
 
-        <div class="row g-4">
+                <div class="sl-rooms-facts">
+                    <div class="sl-rooms-fact">
+                        <strong>{{ rooms|length }}</strong>
+                        <span>Варіантів номерів</span>
+                    </div>
+                    <div class="sl-rooms-fact">
+                        <strong>01</strong>
+                        <span>Твій наступний відпочинок</span>
+                    </div>
+                </div>
+            </div>
 
-            {% for room in rooms %}
-                <div class="col-12 col-md-6 col-lg-4">
+            <div class="sl-rooms-visual">
+                {% with hotel_image=hotel.images.first %}
+                    {% if hotel_image %}
+                        <img src="{{ hotel_image.image.url }}" alt="{{ hotel.name }}" fetchpriority="high">
+                    {% else %}
+                        <img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1500&q=85" alt="Інтер’єр готелю {{ hotel.name }}" fetchpriority="high">
+                    {% endif %}
+                {% endwith %}
+                <div class="sl-rooms-visual-caption">
+                    <span>STAYLUX · YOUR STAY</span>
+                    <strong>Трохи часу для себе.</strong>
+                </div>
+            </div>
+        </section>
 
-                    <div class="room-card">
+        <section aria-labelledby="sl-room-list-title">
+            <div class="sl-rooms-heading">
+                <div>
+                    <div class="sl-rooms-eyebrow">Choose your space</div>
+                    <h2 id="sl-room-list-title">Знайди свій<br><em>ідеальний номер.</em></h2>
+                </div>
+                <p>Кожен простір має свій характер. Обери той, у якому захочеться залишитися трохи довше.</p>
+            </div>
 
-                        <h3>Номер {{ room.room_number }}</h3>
-
-                        <p class="text-secondary">
-                            {% if room.room_type == 'single' %}
-                                Одномісний номер
-                            {% elif room.room_type == 'double' %}
-                                Двомісний номер
-                            {% elif room.room_type == 'suite' %}
-                                Люкс
-                            {% else %}
-                                {{ room.get_room_type_display }}
-                            {% endif %}
-                        </p>
-
-                        <p>
-                            Кількість гостей:
-                            {{ room.capacity }}
-                        </p>
-
-                        <div class="room-price">
-                            {{ room.price_per_night }} грн
-                            <small class="fs-6 fw-normal">
-                                / ніч
-                            </small>
+            <div class="sl-room-grid">
+                {% for room in rooms %}
+                    <article class="sl-room-card">
+                        <div class="sl-room-gallery">
+                            {% with first_photo=room.images.first %}
+                                {% if first_photo %}
+                                    <img src="{{ first_photo.image.url }}" alt="Номер {{ room.room_number }} — {{ hotel.name }}" loading="lazy">
+                                {% else %}
+                                    <div class="sl-room-gallery-empty">
+                                        <span>⌂</span>
+                                        <div>Фото цього номера скоро з’явиться</div>
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
+                            <span class="sl-room-index">№ {{ room.room_number }}</span>
                         </div>
 
-                        {% if room.is_available %}
-                            <span class="room-status">
-                                Доступний
-                            </span>
-                        {% else %}
-                            <span class="room-status room-unavailable">
-                                Недоступний
-                            </span>
-                        {% endif %}
+                        <div class="sl-room-content">
+                            <div class="sl-room-kicker">
+                                {% if room.room_type == 'single' %}
+                                    For solo stays
+                                {% elif room.room_type == 'double' %}
+                                    For two
+                                {% elif room.room_type == 'suite' %}
+                                    A little more luxury
+                                {% else %}
+                                    Your space
+                                {% endif %}
+                            </div>
 
-                        <div class="mt-4">
-                            <a
-                                href="{% url 'room' room.id %}"
-                                class="room-btn"
-                            >
-                                Детальніше →
+                            <h3>Номер {{ room.room_number }}</h3>
+
+                            <p class="sl-room-type">
+                                {% if room.room_type == 'single' %}
+                                    Одномісний номер
+                                {% elif room.room_type == 'double' %}
+                                    Двомісний номер
+                                {% elif room.room_type == 'suite' %}
+                                    Люкс
+                                {% else %}
+                                    {{ room.get_room_type_display }}
+                                {% endif %}
+                            </p>
+
+                            <div class="sl-room-meta">
+                                <span><b>♧</b> До {{ room.capacity }} гостей</span>
+                                {% if room.is_available %}
+                                    <span class="sl-room-status">Доступний</span>
+                                {% else %}
+                                    <span class="sl-room-status unavailable">Недоступний</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="sl-room-bottom">
+                                <div>
+                                    <span class="sl-room-price-caption">Вартість за ніч</span>
+                                    <div class="sl-room-price">
+                                        {{ room.price_per_night }} <small>грн / ніч</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <a href="{% url 'room' room.id %}" class="sl-room-btn">
+                                Детальніше про номер <span aria-hidden="true">↗</span>
                             </a>
                         </div>
-
+                    </article>
+                {% empty %}
+                    <div class="sl-rooms-empty">
+                        <div class="sl-rooms-eyebrow" style="justify-content:center;">A little pause</div>
+                        <h3>Номери ще готуються до гостей.</h3>
+                        <p>У цьому готелі поки немає доданих номерів. Заглянь сюди трохи пізніше.</p>
                     </div>
-                </div>
+                {% endfor %}
+            </div>
+        </section>
 
-            {% empty %}
-                <div class="col-12">
-                    <div class="alert alert-info">
-                        У цьому готелі поки немає номерів.
-                    </div>
-                </div>
-            {% endfor %}
+        <aside class="sl-rooms-note">
+            <h3>Відпочинок починається<br>з правильного місця.</h3>
+            <p>Переглянь варіанти, порівняй простори й обери номер, який пасує саме твоїй подорожі.</p>
+        </aside>
 
-        </div>
     </div>
 </div>
-
 {% endblock %}

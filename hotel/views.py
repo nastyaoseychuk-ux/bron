@@ -23,4 +23,4 @@ def hotel_rooms(request, id):
 def room(request, id):
     room = get_object_or_404(Room, id=id)
 
-    return render(request, 'rooms.html', {'room': room})
+    return render(request, 'room.html', {'room': room})

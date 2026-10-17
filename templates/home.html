@@ -1,377 +1,831 @@
-
 {% extends 'base.html' %}
 
-{% block title %}StayLux — Знайди свій готель{% endblock %}
+{% block title %}StayLux — Місця, які залишаються з тобою{% endblock %}
 
 {% block content %}
-
 <style>
-    .hotel-page {
-        background: #f7f8fc;
+    /* StayLux — editorial hospitality design */
+    :root {
+        --sl-ink: #202b25;
+        --sl-muted: #6f776f;
+        --sl-paper: #f5f2eb;
+        --sl-white: #fffdf8;
+        --sl-green: #29483b;
+        --sl-green-dark: #1c332a;
+        --sl-lime: #d6e2a8;
+        --sl-clay: #c87555;
+        --sl-line: rgba(32, 43, 37, .14);
+        --sl-radius: 20px;
+    }
+
+    .staylux-page {
+        background: var(--sl-paper);
+        color: var(--sl-ink);
+        font-family: inherit;
         min-height: 100vh;
-        padding-bottom: 60px;
-        color: #20263a;
-    }
-
-    .hero {
-        background: linear-gradient(120deg, #17243e, #354e78);
-        color: white;
-        padding: 65px 30px;
-        border-radius: 0 0 28px 28px;
-        margin-bottom: 40px;
-    }
-
-    .hero h1 {
-        font-size: clamp(30px, 4vw, 48px);
-        font-weight: 800;
-        margin-bottom: 15px;
-    }
-
-    .hero p {
-        color: #dce5f5;
-        font-size: 17px;
-        max-width: 600px;
-    }
-
-    .hotel-search {
-        background: white;
-        border-radius: 16px;
-        padding: 20px;
-        margin-top: 28px;
-        box-shadow: 0 10px 35px #101c3520;
-    }
-
-    .hotel-search input {
-        width: 100%;
-        padding: 13px 15px;
-        border: 1px solid #e1e5ed;
-        border-radius: 10px;
-        outline: none;
-    }
-
-    .hotel-search input:focus {
-        border-color: #4267a9;
-    }
-
-    .section-heading {
-        margin-bottom: 25px;
-    }
-
-    .section-heading h2 {
-        font-size: 30px;
-        font-weight: 800;
-    }
-
-    .section-heading p {
-        color: #788196;
-    }
-
-    .hotel-card {
-        background: white;
-        border-radius: 18px;
         overflow: hidden;
-        height: 100%;
-        border: 1px solid #edf0f5;
-        box-shadow: 0 5px 20px #19294a08;
-        transition: transform .25s, box-shadow .25s;
+        padding: 0 0 70px;
     }
 
-    .hotel-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 16px 35px #19294a15;
-    }
+    .staylux-page * { box-sizing: border-box; }
+    .staylux-page a { color: inherit; }
+    .sl-shell { width: min(1320px, calc(100% - 48px)); margin: 0 auto; }
 
-    .hotel-photo {
-        width: 100%;
-        height: 225px;
-        object-fit: cover;
-        display: block;
-        background: #e9edf5;
-    }
-
-    .hotel-placeholder {
-        height: 225px;
-        background: linear-gradient(135deg, #dce5f2, #b9c9df);
-        display: flex;
-        justify-content: center;
+    .sl-topline {
         align-items: center;
-        color: #526784;
-        font-size: 16px;
-    }
-
-    .hotel-card-body {
-        padding: 22px;
-    }
-
-    .hotel-location {
-        color: #788196;
-        font-size: 14px;
-        margin-bottom: 12px;
-    }
-
-    .hotel-card h3 {
-        font-size: 21px;
-        font-weight: 750;
-        margin-bottom: 10px;
-    }
-
-    .hotel-description {
-        color: #70798b;
-        font-size: 14px;
-        line-height: 1.7;
-        min-height: 48px;
-    }
-
-    .amenities {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 7px;
-        margin: 16px 0;
-    }
-
-    .amenity {
-        background: #f0f4fa;
-        color: #455773;
-        padding: 6px 10px;
-        border-radius: 7px;
-        font-size: 12px;
-    }
-
-    .hotel-bottom {
+        border-bottom: 1px solid var(--sl-line);
         display: flex;
         justify-content: space-between;
+        gap: 18px;
+        min-height: 76px;
+    }
+
+    .sl-brand {
         align-items: center;
-        gap: 12px;
-        border-top: 1px solid #edf0f5;
-        padding-top: 17px;
-        margin-top: 18px;
+        display: inline-flex;
+        gap: 11px;
+        font-size: 22px;
+        font-weight: 750;
+        letter-spacing: -.06em;
+        text-decoration: none;
     }
 
-    .price-label {
-        display: block;
-        color: #858da0;
+    .sl-brand-mark {
+        align-items: center;
+        border: 1px solid var(--sl-ink);
+        border-radius: 50%;
+        display: inline-flex;
+        height: 34px;
+        justify-content: center;
+        position: relative;
+        width: 34px;
+    }
+
+    .sl-brand-mark::before {
+        border: 1px solid var(--sl-ink);
+        border-radius: 50%;
+        content: "";
+        height: 17px;
+        width: 17px;
+    }
+
+    .sl-brand-mark::after {
+        background: var(--sl-clay);
+        border: 2px solid var(--sl-paper);
+        border-radius: 50%;
+        content: "";
+        height: 9px;
+        position: absolute;
+        right: -1px;
+        top: 1px;
+        width: 9px;
+    }
+
+    .sl-nav {
+        align-items: center;
+        display: flex;
+        gap: clamp(15px, 2.3vw, 32px);
+    }
+
+    .sl-nav a {
+        color: var(--sl-muted);
         font-size: 12px;
-        margin-bottom: 4px;
+        text-decoration: none;
+        transition: color .2s ease;
     }
+    .sl-nav a:hover { color: var(--sl-clay); }
 
-    .hotel-price {
-        font-size: 21px;
-        font-weight: 800;
-        color: #243b63;
+    .sl-top-cta {
+        border: 1px solid var(--sl-ink);
+        border-radius: 999px;
+        font-size: 12px;
+        padding: 11px 16px;
+        text-decoration: none;
+        transition: background .2s, color .2s;
         white-space: nowrap;
     }
+    .sl-top-cta:hover { background: var(--sl-ink); color: var(--sl-white); }
 
-    .hotel-price small {
+    .sl-hero {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr);
+        padding: 34px 0 50px;
+    }
+
+    .sl-hero-copy {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 510px;
+        padding: 22px 0 14px;
+    }
+
+    .sl-eyebrow {
+        align-items: center;
+        color: var(--sl-clay);
+        display: flex;
+        font-size: 10px;
+        font-weight: 800;
+        gap: 10px;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+    }
+    .sl-eyebrow::before { background: currentColor; content: ""; height: 1px; width: 27px; }
+
+    .sl-hero h1 {
+        font-size: clamp(48px, 6.8vw, 92px);
+        font-weight: 500;
+        letter-spacing: -.085em;
+        line-height: .91;
+        margin: 26px 0 24px;
+        max-width: 640px;
+    }
+    .sl-hero h1 em {
+        color: var(--sl-green);
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: 400;
+        letter-spacing: -.075em;
+    }
+
+    .sl-hero-description {
+        color: var(--sl-muted);
+        font-size: 15px;
+        line-height: 1.8;
+        margin: 0;
+        max-width: 370px;
+    }
+
+    .sl-hero-bottom {
+        align-items: end;
+        display: flex;
+        gap: 20px;
+        justify-content: space-between;
+        margin-top: 36px;
+    }
+
+    .sl-primary-link {
+        align-items: center;
+        background: var(--sl-green);
+        border: 1px solid var(--sl-green);
+        border-radius: 999px;
+        color: white !important;
+        display: inline-flex;
         font-size: 12px;
+        gap: 25px;
+        justify-content: space-between;
+        padding: 15px 19px;
+        text-decoration: none;
+        transition: background .2s, transform .2s;
+    }
+    .sl-primary-link:hover { background: var(--sl-green-dark); transform: translateY(-2px); }
+
+    .sl-note {
+        color: var(--sl-muted);
+        font-size: 10px;
+        line-height: 1.6;
+        max-width: 125px;
+    }
+
+    .sl-hero-visual {
+        background: #d5d3c8;
+        border-radius: 48% 48% 18px 18px;
+        min-height: 510px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .sl-hero-visual img {
+        height: 100%;
+        inset: 0;
+        object-fit: cover;
+        position: absolute;
+        transition: transform .8s cubic-bezier(.2,.7,.2,1);
+        width: 100%;
+    }
+    .sl-hero-visual:hover img { transform: scale(1.035); }
+
+    .sl-image-shade {
+        background: linear-gradient(180deg, transparent 42%, rgba(16, 27, 21, .57) 100%);
+        inset: 0;
+        position: absolute;
+    }
+
+    .sl-image-label {
+        bottom: 24px;
+        color: white;
+        left: 25px;
+        position: absolute;
+        right: 25px;
+    }
+    .sl-image-label small {
+        display: block;
+        font-size: 10px;
+        letter-spacing: .15em;
+        margin-bottom: 7px;
+        text-transform: uppercase;
+    }
+    .sl-image-label strong {
+        display: block;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(25px, 3vw, 39px);
+        font-weight: 400;
+        letter-spacing: -.04em;
+    }
+
+    .sl-orbit {
+        align-items: center;
+        background: var(--sl-lime);
+        border-radius: 50%;
+        color: var(--sl-green-dark);
+        display: flex;
+        flex-direction: column;
+        height: 106px;
+        justify-content: center;
+        position: absolute;
+        right: 22px;
+        text-align: center;
+        top: 23%;
+        transform: rotate(9deg);
+        width: 106px;
+    }
+    .sl-orbit span { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
+    .sl-orbit strong { font-family: Georgia, serif; font-size: 27px; font-weight: 400; }
+
+    .sl-search-wrap {
+        background: var(--sl-white);
+        border: 1px solid var(--sl-line);
+        border-radius: 17px;
+        margin-bottom: 92px;
+        padding: 12px;
+    }
+
+    .sl-search {
+        align-items: stretch;
+        display: grid;
+        gap: 8px;
+        grid-template-columns: 1fr auto;
+    }
+
+    .sl-search-field {
+        align-items: center;
+        display: flex;
+        gap: 13px;
+        min-width: 0;
+        padding: 9px 16px;
+    }
+
+    .sl-search-icon {
+        align-items: center;
+        border: 1px solid var(--sl-line);
+        border-radius: 50%;
+        color: var(--sl-clay);
+        display: flex;
+        flex: 0 0 36px;
+        font-size: 16px;
+        height: 36px;
+        justify-content: center;
+        width: 36px;
+    }
+
+    .sl-search-field label {
+        color: var(--sl-muted);
+        display: block;
+        font-size: 10px;
+        margin-bottom: 4px;
+    }
+    .sl-search-field input {
+        background: transparent;
+        border: 0;
+        color: var(--sl-ink);
+        font: inherit;
+        font-size: 13px;
+        min-width: 0;
+        outline: none;
+        width: 100%;
+    }
+    .sl-search-field input::placeholder { color: #9b9e95; }
+
+    .sl-search-count {
+        align-items: center;
+        border-left: 1px solid var(--sl-line);
+        color: var(--sl-muted);
+        display: flex;
+        font-size: 11px;
+        padding: 0 20px;
+        white-space: nowrap;
+    }
+    .sl-search-count strong { color: var(--sl-ink); margin-right: 5px; }
+
+    .sl-section { margin-bottom: 92px; }
+    .sl-section-head {
+        align-items: end;
+        display: flex;
+        gap: 25px;
+        justify-content: space-between;
+        margin-bottom: 28px;
+    }
+    .sl-section-head h2 {
+        font-size: clamp(31px, 4.2vw, 51px);
+        font-weight: 500;
+        letter-spacing: -.07em;
+        line-height: 1;
+        margin: 13px 0 0;
+    }
+    .sl-section-head h2 em {
+        color: var(--sl-green);
+        font-family: Georgia, serif;
         font-weight: 400;
     }
+    .sl-section-head p {
+        color: var(--sl-muted);
+        font-size: 12px;
+        line-height: 1.7;
+        margin: 0;
+        max-width: 250px;
+    }
 
-    .hotel-btn {
-        display: inline-block;
+    .sl-hotel-grid {
+        display: grid;
+        gap: 22px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .sl-hotel-card {
+        min-width: 0;
+        position: relative;
+    }
+    .sl-hotel-card:nth-child(3n + 2) { margin-top: 34px; }
+
+    .sl-hotel-image {
+        background: #e2dfd5;
+        border-radius: var(--sl-radius);
+        display: block;
+        height: 310px;
+        overflow: hidden;
+        position: relative;
+    }
+    .sl-hotel-image img {
+        height: 100%;
+        object-fit: cover;
+        transition: transform .6s cubic-bezier(.2,.7,.2,1);
+        width: 100%;
+    }
+    .sl-hotel-card:hover .sl-hotel-image img { transform: scale(1.055); }
+
+    .sl-hotel-number {
+        align-items: center;
+        backdrop-filter: blur(10px);
+        background: rgba(255, 253, 248, .88);
+        border-radius: 50%;
+        display: flex;
+        font-size: 10px;
+        height: 39px;
+        justify-content: center;
+        left: 14px;
+        position: absolute;
+        top: 14px;
+        width: 39px;
+    }
+
+    .sl-hotel-content { padding: 17px 3px 0; }
+    .sl-hotel-location {
+        color: var(--sl-clay);
+        font-size: 10px;
+        font-weight: 750;
+        letter-spacing: .11em;
+        margin-bottom: 9px;
+        text-transform: uppercase;
+    }
+    .sl-hotel-content h3 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 25px;
+        font-weight: 400;
+        letter-spacing: -.04em;
+        margin: 0 0 9px;
+    }
+    .sl-hotel-description {
+        color: var(--sl-muted);
+        display: -webkit-box;
+        font-size: 12px;
+        line-height: 1.7;
+        margin: 0;
+        min-height: 41px;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    .sl-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 18px; }
+    .sl-tag {
+        border: 1px solid var(--sl-line);
+        border-radius: 999px;
+        color: var(--sl-muted);
+        font-size: 10px;
+        padding: 6px 9px;
+    }
+
+    .sl-card-footer {
+        align-items: center;
+        border-top: 1px solid var(--sl-line);
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+        padding-top: 15px;
+    }
+    .sl-price-caption { color: var(--sl-muted); display: block; font-size: 10px; margin-bottom: 3px; }
+    .sl-price { font-size: 18px; font-weight: 750; letter-spacing: -.04em; white-space: nowrap; }
+    .sl-price small { color: var(--sl-muted); font-size: 10px; font-weight: 400; letter-spacing: 0; }
+    .sl-card-link {
+        align-items: center;
+        border: 1px solid var(--sl-line);
+        border-radius: 50%;
+        display: inline-flex;
+        flex: 0 0 40px;
+        font-size: 17px;
+        height: 40px;
+        justify-content: center;
         text-decoration: none;
-        background: #29466f;
-        color: white;
-        border-radius: 9px;
-        padding: 11px 14px;
-        font-size: 13px;
-        font-weight: 600;
+        transition: background .2s, color .2s, transform .2s;
+        width: 40px;
+    }
+    .sl-card-link:hover { background: var(--sl-green); color: white; transform: rotate(-35deg); }
+
+    .sl-empty {
+        background: var(--sl-white);
+        border: 1px dashed var(--sl-line);
+        border-radius: var(--sl-radius);
+        color: var(--sl-muted);
+        grid-column: 1 / -1;
+        padding: 55px 24px;
         text-align: center;
-        transition: background .2s;
     }
+    .sl-empty h3 { color: var(--sl-ink); font-family: Georgia, serif; font-size: 28px; font-weight: 400; }
 
-    .hotel-btn:hover {
-        background: #192e4c;
-        color: white;
+    .sl-manifesto {
+        background: var(--sl-green);
+        border-radius: 24px;
+        color: var(--sl-white);
+        display: grid;
+        gap: 30px;
+        grid-template-columns: 1.1fr .9fr;
+        margin-bottom: 65px;
+        overflow: hidden;
+        padding: clamp(28px, 5vw, 64px);
+        position: relative;
     }
-
-    .room-count {
+    .sl-manifesto::after {
+        border: 1px solid rgba(255,255,255,.15);
+        border-radius: 50%;
+        content: "";
+        height: 380px;
+        pointer-events: none;
+        position: absolute;
+        right: -100px;
+        top: -160px;
+        width: 380px;
+    }
+    .sl-manifesto .sl-eyebrow { color: var(--sl-lime); }
+    .sl-manifesto h2 {
+        font-size: clamp(34px, 4.7vw, 59px);
+        font-weight: 400;
+        letter-spacing: -.075em;
+        line-height: 1;
+        margin: 20px 0;
+        max-width: 560px;
+    }
+    .sl-manifesto h2 em { color: var(--sl-lime); font-family: Georgia, serif; font-weight: 400; }
+    .sl-manifesto-copy {
+        align-self: end;
+        color: rgba(255,255,255,.72);
         font-size: 13px;
-        color: #788196;
-        margin-top: 14px;
+        line-height: 1.9;
+        max-width: 360px;
+        position: relative;
+        z-index: 1;
+    }
+    .sl-manifesto-copy p { margin: 0 0 24px; }
+    .sl-manifesto-copy a {
+        align-items: center;
+        border-bottom: 1px solid rgba(255,255,255,.45);
+        color: var(--sl-white);
+        display: inline-flex;
+        font-size: 12px;
+        gap: 20px;
+        padding-bottom: 9px;
+        text-decoration: none;
     }
 
-    .empty-state {
-        background: white;
-        border-radius: 16px;
-        padding: 45px 20px;
-        text-align: center;
-        color: #788196;
+    .sl-bottom-line {
+        align-items: center;
+        border-top: 1px solid var(--sl-line);
+        color: var(--sl-muted);
+        display: flex;
+        font-size: 10px;
+        gap: 20px;
+        justify-content: space-between;
+        padding-top: 22px;
+    }
+    .sl-bottom-line strong { color: var(--sl-ink); font-size: 13px; letter-spacing: -.04em; }
+
+    @media (max-width: 900px) {
+        .sl-nav { gap: 14px; }
+        .sl-nav a:nth-child(n+3) { display: none; }
+        .sl-hero { grid-template-columns: 1fr 1fr; }
+        .sl-hero-copy, .sl-hero-visual { min-height: 440px; }
+        .sl-hero h1 { font-size: clamp(48px, 7vw, 70px); }
+        .sl-hotel-grid { gap: 17px; }
+        .sl-hotel-image { height: 250px; }
+        .sl-hotel-content h3 { font-size: 22px; }
+        .sl-manifesto { grid-template-columns: 1fr 1fr; }
     }
 
-    @media (max-width: 576px) {
-        .hero {
-            padding: 42px 20px;
-        }
+    @media (max-width: 640px) {
+        .sl-shell { width: min(100% - 30px, 520px); }
+        .sl-topline { min-height: 65px; }
+        .sl-brand { font-size: 20px; }
+        .sl-nav { display: none; }
+        .sl-top-cta { font-size: 11px; padding: 10px 12px; }
+        .sl-hero { display: flex; flex-direction: column; gap: 26px; padding: 28px 0 30px; }
+        .sl-hero-copy { min-height: auto; padding: 10px 0 0; }
+        .sl-hero h1 { font-size: clamp(55px, 15vw, 78px); margin: 22px 0 17px; }
+        .sl-hero-description { font-size: 13px; max-width: 330px; }
+        .sl-hero-bottom { align-items: center; justify-content: flex-start; margin-top: 24px; }
+        .sl-hero-visual { border-radius: 45% 45% 16px 16px; min-height: 390px; }
+        .sl-orbit { height: 86px; right: 15px; top: 18%; width: 86px; }
+        .sl-orbit strong { font-size: 23px; }
+        .sl-search-wrap { margin-bottom: 65px; padding: 9px; }
+        .sl-search { grid-template-columns: 1fr; }
+        .sl-search-field { padding: 8px 9px; }
+        .sl-search-count { border-left: 0; border-top: 1px solid var(--sl-line); padding: 12px 9px 5px 58px; }
+        .sl-section { margin-bottom: 66px; }
+        .sl-section-head { align-items: start; flex-direction: column; gap: 13px; margin-bottom: 21px; }
+        .sl-section-head h2 { font-size: 39px; }
+        .sl-section-head p { max-width: 330px; }
+        .sl-hotel-grid { grid-template-columns: 1fr; gap: 31px; }
+        .sl-hotel-card:nth-child(3n + 2) { margin-top: 0; }
+        .sl-hotel-image { height: clamp(260px, 75vw, 390px); }
+        .sl-hotel-content h3 { font-size: 27px; }
+        .sl-hotel-description { min-height: 0; }
+        .sl-manifesto { border-radius: 18px; grid-template-columns: 1fr; gap: 16px; margin-bottom: 45px; padding: 29px 24px; }
+        .sl-manifesto h2 { font-size: 43px; }
+        .sl-manifesto-copy { max-width: 100%; }
+        .sl-bottom-line { align-items: flex-start; flex-direction: column; gap: 8px; }
+    }
 
-        .hotel-card-body {
-            padding: 18px;
-        }
 
-        .section-heading h2 {
-            font-size: 25px;
+    /* Layout correction: breakout from any narrow wrapper in base.html */
+    .staylux-page {
+        width: 100vw;
+        max-width: none;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+    }
+    .staylux-page .sl-shell {
+        width: min(1440px, calc(100% - 72px));
+        max-width: 1440px;
+    }
+    .staylux-page .sl-hero {
+        grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+        gap: clamp(28px, 4vw, 64px);
+        padding-top: 42px;
+    }
+    .staylux-page .sl-hero-copy,
+    .staylux-page .sl-hero-visual {
+        min-height: clamp(470px, 43vw, 620px);
+    }
+    .staylux-page .sl-hero h1 {
+        font-size: clamp(62px, 7.3vw, 108px);
+    }
+    .staylux-page .sl-hotel-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        column-gap: clamp(18px, 2.2vw, 34px);
+        row-gap: 42px;
+    }
+    .staylux-page .sl-hotel-image {
+        height: clamp(280px, 27vw, 390px);
+    }
+    .staylux-page .sl-hotel-card:nth-child(3n + 2) { margin-top: 38px; }
+    .staylux-page .sl-section { margin-bottom: 110px; }
+    .staylux-page .sl-search-wrap { margin-bottom: 100px; }
+    .staylux-page .sl-section-head h2 { font-size: clamp(40px, 4.6vw, 64px); }
+
+    @media (max-width: 900px) {
+        .staylux-page .sl-shell { width: calc(100% - 40px); }
+        .staylux-page .sl-hero-copy,
+        .staylux-page .sl-hero-visual { min-height: 440px; }
+        .staylux-page .sl-hero h1 { font-size: clamp(48px, 7vw, 72px); }
+        .staylux-page .sl-hotel-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .staylux-page .sl-hotel-card:nth-child(3n + 2) { margin-top: 0; }
+        .staylux-page .sl-hotel-card:nth-child(even) { margin-top: 28px; }
+    }
+    @media (max-width: 640px) {
+        .staylux-page .sl-shell { width: calc(100% - 30px); }
+        .staylux-page .sl-hero { display: flex; flex-direction: column; gap: 26px; }
+        .staylux-page .sl-hero-copy { min-height: auto; }
+        .staylux-page .sl-hero-visual { min-height: 390px; }
+        .staylux-page .sl-hotel-grid { grid-template-columns: 1fr; }
+        .staylux-page .sl-hotel-card:nth-child(even) { margin-top: 0; }
+        .staylux-page .sl-hotel-image { height: clamp(270px, 78vw, 420px); }
+        .staylux-page .sl-section { margin-bottom: 66px; }
+        .staylux-page .sl-search-wrap { margin-bottom: 65px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .staylux-page *, .staylux-page *::before, .staylux-page *::after {
+            animation-duration: .01ms !important;
+            scroll-behavior: auto !important;
+            transition-duration: .01ms !important;
         }
     }
 </style>
 
-<div class="hotel-page">
+<div class="staylux-page">
+    <div class="sl-shell">
 
-    <!-- Головний екран -->
-    <section class="hero">
-        <div class="container">
-            <p>STAYLUX · ГОТЕЛІ ТА ВІДПОЧИНОК</p>
-
-            <h1>Знайди місце,<br>куди захочеться повернутися.</h1>
-
-            <p>
-                Відкрий для себе комфортні готелі, переглянь номери
-                та обери ідеальне місце для своєї наступної подорожі.
-            </p>
-
-            <div class="hotel-search">
-                <input
-                    type="text"
-                    id="hotelSearch"
-                    placeholder="Введи назву готелю або місто..."
-                    aria-label="Пошук готелю за назвою або містом"
-                >
-            </div>
-        </div>
-    </section>
-
-    <!-- Список готелів -->
-    <section class="container">
-        <div class="section-heading">
-            <h2>Популярні готелі</h2>
-            <p>Обирай готель для комфортного відпочинку.</p>
-        </div>
-
-        <div class="row g-4" id="hotelList">
-
-            {% for hotel in hotels %}
-                <div
-                    class="col-12 col-md-6 col-lg-4 hotel-item"
-                    data-name="{{ hotel.name|lower }}"
-                    data-city="{{ hotel.location.city|lower }}"
-                >
-                    <article class="hotel-card">
-
-                        <!-- Фотографія готелю -->
-                        {% with first_image=hotel.images.first %}
-                            {% if first_image %}
-                                <img
-                                    src="{{ first_image.image.url }}"
-                                    class="hotel-photo"
-                                    alt="{{ hotel.name }}"
-                                    loading="lazy"
-                                >
-                            {% else %}
-                                <div class="hotel-placeholder">
-                                    Фотографія відсутня
-                                </div>
-                            {% endif %}
-                        {% endwith %}
-
-                        <div class="hotel-card-body">
-
-                            <div class="hotel-location">
-                                {{ hotel.location.city }},
-                                {{ hotel.location.country }}
-                            </div>
-
-                            <h3>{{ hotel.name }}</h3>
-
-                            <p class="hotel-description">
-                                {{ hotel.description|truncatewords:20 }}
-                            </p>
-
-                            <!-- Зручності -->
-                            <div class="amenities">
-                                {% for amenity in hotel.amenities.all|slice:":4" %}
-                                    <span class="amenity">
-                                        {{ amenity.name }}
-                                    </span>
-                                {% empty %}
-                                    <span class="amenity">
-                                        Інформація уточнюється
-                                    </span>
-                                {% endfor %}
-                            </div>
-
-                            <div class="hotel-bottom">
-                                <div>
-                                    <span class="price-label">
-                                        Вартість за ніч
-                                    </span>
-
-                                    <div class="hotel-price">
-                                        {{ hotel.price_per_night }} 
-                                        <small>грн / ніч</small>
-                                    </div>
-                                </div>
-
-                                <a
-                                    href="{% url 'hotel_rooms' hotel.id %}"
-                                    class="hotel-btn"
-                                >
-                                    Переглянути →
-                                </a>
-                            </div>
-
-                            <div class="room-count">
-                                Номерів у готелі: {{ hotel.rooms.count }}
-                            </div>
-
-                        </div>
-                    </article>
-                </div>
-
-            {% empty %}
-                <div class="col-12">
-                    <div class="empty-state">
-                        <h4>Поки що готелів немає</h4>
-                        <p>
-                            Додай перший готель через панель адміністратора Django.
+        <main>
+            <section class="sl-hero" aria-labelledby="sl-main-title">
+                <div class="sl-hero-copy">
+                    <div>
+                        <div class="sl-eyebrow">Stay somewhere meaningful</div>
+                        <h1 id="sl-main-title">Не просто<br>місце.<br><em>Відчуття.</em></h1>
+                        <p class="sl-hero-description">
+                            Збираємо готелі, у яких хочеться сповільнитися,
+                            видихнути й залишити трохи більше місця для себе.
                         </p>
+                        <div class="sl-hero-bottom">
+                            <a class="sl-primary-link" href="#hotels">
+                                Знайти свій готель <span aria-hidden="true">↗</span>
+                            </a>
+                            <span class="sl-note">Менше випадкових виборів.<br>Більше особливих історій.</span>
+                        </div>
+                    </div>
+                    <div class="sl-eyebrow" style="color: var(--sl-muted); margin-top: 35px;">
+                        Добре місце змінює ритм
                     </div>
                 </div>
-            {% endfor %}
 
-        </div>
+                <div class="sl-hero-visual">
+                    <img src="https://images.unsplash.com/photo-1601918774946-25832a4be0d6?auto=format&fit=crop&w=1800&q=90" alt="Архітектура затишного готелю серед природи" fetchpriority="high">
+                    <div class="sl-image-shade"></div>
+                    <div class="sl-orbit" aria-label="Добірка StayLux">
+                        <span>Обрано</span>
+                        <strong>для тебе</strong>
+                    </div>
+                    <div class="sl-image-label">
+                        <small>THE STAYLUX EDIT</small>
+                        <strong>Знайди свій темп.</strong>
+                    </div>
+                </div>
+            </section>
 
-        <p id="noResults" class="empty-state mt-4" hidden>
-            За твоїм запитом готелів не знайдено.
-        </p>
-    </section>
+            <section class="sl-search-wrap" id="discover" aria-label="Пошук готелів">
+                <div class="sl-search">
+                    <div class="sl-search-field">
+                        <span class="sl-search-icon" aria-hidden="true">⌕</span>
+                        <div style="flex:1; min-width:0;">
+                            <label for="hotelSearch">Куди вирушаємо?</label>
+                            <input
+                                type="search"
+                                id="hotelSearch"
+                                placeholder="Назва готелю або місто..."
+                                autocomplete="off"
+                                aria-label="Пошук готелю за назвою або містом"
+                            >
+                        </div>
+                    </div>
+                    <div class="sl-search-count" aria-live="polite">
+                        <strong id="visibleHotelCount">{{ hotels|length }}</strong>
+                        <span id="hotelCountLabel">місць у колекції</span>
+                    </div>
+                </div>
+            </section>
 
+            <section class="sl-section" id="hotels" aria-labelledby="sl-hotels-title">
+                <div class="sl-section-head">
+                    <div>
+                        <div class="sl-eyebrow">The collection</div>
+                        <h2 id="sl-hotels-title">Місця з власним<br><em>характером.</em></h2>
+                    </div>
+                    <p>Не шукай ідеальний готель за всіма правилами. Шукай той, який підходить саме тобі.</p>
+                </div>
+
+                <div class="sl-hotel-grid" id="hotelList">
+                    {% for hotel in hotels %}
+                        <article
+                            class="sl-hotel-card hotel-item"
+                            data-name="{{ hotel.name|lower }}"
+                            data-city="{{ hotel.location.city|lower }}"
+                        >
+                            <a class="sl-hotel-image" href="{% url 'hotel_rooms' hotel.id %}" aria-label="Переглянути номери: {{ hotel.name }}">
+                                {% with first_image=hotel.images.first %}
+                                    {% if first_image %}
+                                        <img src="{{ first_image.image.url }}" alt="{{ hotel.name }}" loading="lazy">
+                                    {% else %}
+                                        <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=900&q=80" alt="Готель {{ hotel.name }}" loading="lazy">
+                                    {% endif %}
+                                {% endwith %}
+                                <span class="sl-hotel-number">{{ forloop.counter|stringformat:"02d" }}</span>
+                            </a>
+
+                            <div class="sl-hotel-content">
+                                <div class="sl-hotel-location">{{ hotel.location.city }}, {{ hotel.location.country }}</div>
+                                <h3>{{ hotel.name }}</h3>
+                                <p class="sl-hotel-description">{{ hotel.description|truncatewords:24 }}</p>
+
+                                <div class="sl-tags">
+                                    {% for amenity in hotel.amenities.all|slice:":3" %}
+                                        <span class="sl-tag">{{ amenity.name }}</span>
+                                    {% empty %}
+                                        <span class="sl-tag">Деталі уточнюються</span>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="sl-card-footer">
+                                    <div>
+                                        <span class="sl-price-caption">За одну ніч — від</span>
+                                        <div class="sl-price">{{ hotel.price_per_night }} <small>грн / ніч</small></div>
+                                    </div>
+                                    <a class="sl-card-link" href="{% url 'hotel_rooms' hotel.id %}" aria-label="Переглянути номери готелю {{ hotel.name }}">↗</a>
+                                </div>
+                            </div>
+                        </article>
+                    {% empty %}
+                        <div class="sl-empty" id="emptyHotels">
+                            <div class="sl-eyebrow" style="justify-content:center;">Колекція починається</div>
+                            <h3>Тут буде твоє наступне улюблене місце.</h3>
+                            <p>Додай готелі через панель адміністратора Django — і вони з’являться на цій сторінці.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="sl-empty" id="noResults" hidden style="margin-top:20px;">
+                    <h3>Такого місця поки не знайшли.</h3>
+                    <p>Спробуй іншу назву готелю або місто.</p>
+                </div>
+            </section>
+
+            <section class="sl-manifesto" id="philosophy" aria-labelledby="sl-manifesto-title">
+                <div>
+                    <div class="sl-eyebrow">A different kind of getaway</div>
+                    <h2 id="sl-manifesto-title">Твоя подорож.<br>Твій <em>власний ритм.</em></h2>
+                </div>
+                <div class="sl-manifesto-copy">
+                    <p>
+                        Вихідні без поспіху, нове місто або кілька днів тиші.
+                        Хороший відпочинок починається не з кількості зірок,
+                        а з відчуття, що ти саме там, де потрібно.
+                    </p>
+                    <a href="#hotels">Переглянути колекцію <span aria-hidden="true">↗</span></a>
+                </div>
+            </section>
+        </main>
+
+        <footer class="sl-bottom-line">
+            <strong>staylux<span style="color:var(--sl-clay);">.</span></strong>
+            <span>Місця, які залишаються з тобою.</span>
+            <span>Обирай не просто адресу — обирай відчуття.</span>
+        </footer>
+    </div>
 </div>
 
-<!-- Пошук готелів без перезавантаження сторінки -->
 <script>
+(function () {
     const searchInput = document.getElementById('hotelSearch');
-    const hotelItems = document.querySelectorAll('.hotel-item');
+    const hotelItems = Array.from(document.querySelectorAll('.hotel-item'));
     const noResults = document.getElementById('noResults');
+    const count = document.getElementById('visibleHotelCount');
+    const countLabel = document.getElementById('hotelCountLabel');
 
-    searchInput.addEventListener('input', function () {
-        const query = this.value.trim().toLowerCase();
+    if (!searchInput) return;
+
+    function updateHotelSearch() {
+        const query = searchInput.value.trim().toLocaleLowerCase();
         let visibleCount = 0;
 
         hotelItems.forEach(function (item) {
-            const name = item.dataset.name || '';
-            const city = item.dataset.city || '';
-
-            const matches =
-                name.includes(query) || city.includes(query);
+            const name = (item.dataset.name || '').toLocaleLowerCase();
+            const city = (item.dataset.city || '').toLocaleLowerCase();
+            const matches = name.includes(query) || city.includes(query);
 
             item.hidden = !matches;
-
-            if (matches) {
-                visibleCount++;
-            }
+            if (matches) visibleCount += 1;
         });
 
-        noResults.hidden = visibleCount !== 0;
-    });
-</script>
+        if (count) count.textContent = visibleCount;
+        if (countLabel) {
+            countLabel.textContent = visibleCount === 1
+                ? 'місце у колекції'
+                : 'місць у колекції';
+        }
 
+        if (noResults) {
+            noResults.hidden = query.length === 0 || visibleCount !== 0;
+        }
+    }
+
+    searchInput.addEventListener('input', updateHotelSearch);
+    updateHotelSearch();
+})();
+</script>
 {% endblock %}
-```
