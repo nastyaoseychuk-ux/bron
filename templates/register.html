@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% block title %}Реєстрація — StayLux{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --sl-ink: #202b25;
+        --sl-muted: #6f776f;
+        --sl-paper: #f5f2eb;
+        --sl-white: #fffdf8;
+        --sl-green: #29483b;
+        --sl-green-dark: #1c332a;
+        --sl-lime: #d6e2a8;
+        --sl-clay: #c87555;
+        --sl-line: rgba(32, 43, 37, .14);
+    }
+
+    .sl-auth-page {
+        align-items: center;
+        background: var(--sl-paper);
+        color: var(--sl-ink);
+        display: flex;
+        font-family: inherit;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 48px 20px;
+        /* breakout from narrow wrapper in base.html */
+        width: 100vw;
+        max-width: none;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+    }
+    .sl-auth-page * { box-sizing: border-box; }
+
+    .sl-auth-card {
+        background: var(--sl-white);
+        border: 1px solid var(--sl-line);
+        border-radius: 24px;
+        padding: clamp(28px, 5vw, 44px);
+        width: min(440px, 100%);
+    }
+
+    .sl-brand {
+        align-items: center;
+        display: inline-flex;
+        font-size: 20px;
+        font-weight: 750;
+        gap: 10px;
+        letter-spacing: -.06em;
+        margin-bottom: 28px;
+    }
+    .sl-brand-mark {
+        align-items: center;
+        border: 1px solid var(--sl-ink);
+        border-radius: 50%;
+        display: inline-flex;
+        height: 32px;
+        justify-content: center;
+        position: relative;
+        width: 32px;
+    }
+    .sl-brand-mark::before {
+        border: 1px solid var(--sl-ink);
+        border-radius: 50%;
+        content: "";
+        height: 16px;
+        width: 16px;
+    }
+    .sl-brand-mark::after {
+        background: var(--sl-clay);
+        border: 2px solid var(--sl-white);
+        border-radius: 50%;
+        content: "";
+        height: 9px;
+        position: absolute;
+        right: -1px;
+        top: 1px;
+        width: 9px;
+    }
+
+    .sl-auth-card h1 {
+        font-size: clamp(36px, 6vw, 46px);
+        font-weight: 500;
+        letter-spacing: -.07em;
+        line-height: 1;
+        margin: 0 0 10px;
+    }
+    .sl-auth-card h1 em {
+        color: var(--sl-green);
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: 400;
+    }
+    .sl-auth-sub {
+        color: var(--sl-muted);
+        font-size: 13px;
+        line-height: 1.7;
+        margin: 0 0 26px;
+    }
+
+    .sl-auth-card form { display: grid; gap: 16px; }
+
+    .sl-field label {
+        color: var(--sl-muted);
+        display: block;
+        font-size: 11px;
+        margin-bottom: 7px;
+    }
+    .sl-field input:not([type="checkbox"]):not([type="radio"]),
+    .sl-field select,
+    .sl-field textarea {
+        background: var(--sl-paper);
+        border: 1px solid var(--sl-line);
+        border-radius: 14px;
+        color: var(--sl-ink);
+        font: inherit;
+        font-size: 14px;
+        outline: none;
+        padding: 14px 16px;
+        transition: border-color .2s, background .2s, box-shadow .2s;
+        width: 100%;
+    }
+    .sl-field input::placeholder { color: #9b9e95; }
+    .sl-field input:focus,
+    .sl-field select:focus,
+    .sl-field textarea:focus {
+        background: var(--sl-white);
+        border-color: var(--sl-green);
+        box-shadow: 0 0 0 3px rgba(41, 72, 59, .12);
+    }
+
+    .sl-help {
+        color: var(--sl-muted);
+        font-size: 11px;
+        line-height: 1.6;
+        margin-top: 7px;
+    }
+    .sl-help ul { margin: 0; padding-left: 16px; }
+
+    .sl-field .errorlist,
+    .sl-form-errors .errorlist {
+        color: var(--sl-clay);
+        font-size: 12px;
+        line-height: 1.5;
+        list-style: none;
+        margin: 7px 0 0;
+        padding: 0;
+    }
+    .sl-field.has-error input:not([type="checkbox"]):not([type="radio"]),
+    .sl-field.has-error select,
+    .sl-field.has-error textarea { border-color: var(--sl-clay); }
+
+    .sl-form-errors {
+        background: rgba(200, 117, 85, .09);
+        border: 1px solid rgba(200, 117, 85, .35);
+        border-radius: 14px;
+        padding: 12px 16px;
+    }
+    .sl-form-errors .errorlist { margin: 0; }
+
+    .sl-submit {
+        align-items: center;
+        background: var(--sl-green);
+        border: 1px solid var(--sl-green);
+        border-radius: 999px;
+        color: white;
+        cursor: pointer;
+        display: inline-flex;
+        font: inherit;
+        font-size: 13px;
+        justify-content: space-between;
+        margin-top: 6px;
+        padding: 16px 22px;
+        transition: background .2s, transform .2s;
+        width: 100%;
+    }
+    .sl-submit:hover { background: var(--sl-green-dark); transform: translateY(-2px); }
+    .sl-submit:focus-visible { outline: 2px solid var(--sl-clay); outline-offset: 3px; }
+
+    .sl-auth-foot {
+        border-top: 1px solid var(--sl-line);
+        color: var(--sl-muted);
+        font-size: 12px;
+        margin: 24px 0 0;
+        padding-top: 20px;
+        text-align: center;
+    }
+    .sl-auth-foot a {
+        border-bottom: 1px solid var(--sl-line);
+        color: var(--sl-ink);
+        text-decoration: none;
+        transition: color .2s, border-color .2s;
+    }
+    .sl-auth-foot a:hover { color: var(--sl-clay); border-color: var(--sl-clay); }
+
+    @media (prefers-reduced-motion: reduce) {
+        .sl-auth-page *, .sl-auth-page *::before, .sl-auth-page *::after {
+            transition-duration: .01ms !important;
+        }
+    }
+</style>
+
+<div class="sl-auth-page">
+    <div class="sl-auth-card">
+        <a class="sl-brand" href="/" style="text-decoration:none;color:inherit;">
+            <span class="sl-brand-mark" aria-hidden="true"></span>
+            staylux<span style="color:var(--sl-clay);">.</span>
+        </a>
+
+        <h1>Створи <em>акаунт.</em></h1>
+        <p class="sl-auth-sub">Заповни форму, щоб зберігати готелі та бронювати номери.</p>
+
+        <form action="" method="post" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="sl-form-errors" role="alert">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="sl-field{% if field.errors %} has-error{% endif %}">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.help_text %}
+                        <div class="sl-help">{{ field.help_text|safe }}</div>
+                    {% endif %}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="sl-submit">
+                Зареєструватися <span aria-hidden="true">↗</span>
+            </button>
+        </form>
+
+        <p class="sl-auth-foot">
+            Вже маєш акаунт? <a href="/login/">Увійти</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

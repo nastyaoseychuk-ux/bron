@@ -1,10 +1,10 @@
-<nav class="sl-navbar">
+{% load static %}
+<nav class="sl-navbar" aria-label="Головна навігація">
     <div class="sl-navbar-inner">
 
         <a class="sl-navbar-brand" href="{% url 'hotel' %}">
-            {% load static %}
             <span class="sl-brand-mark">
-                <img src="{% static 'img/logo.svg' %}" alt="StayLux" width="23" height="23">
+                <img src="{% static 'img/logo.svg' %}" alt="" width="23" height="23">
             </span>
             <span class="sl-brand-name">staylux<span>.</span></span>
         </a>
@@ -19,13 +19,22 @@
         </button>
 
         <div class="sl-navbar-menu" id="slNavbarMenu">
-            <a class="sl-navbar-link active" href="{% url 'hotel' %}">
+            <a class="sl-navbar-link{% if request.resolver_match.url_name == 'hotel' %} active{% endif %}" href="{% url 'hotel' %}">
                 Головна
             </a>
-
-            <a class="sl-navbar-cta" href="{% url 'hotel' %}#hotels">
-                Знайти свій простір <span>↗</span>
+            <a class="sl-navbar-link" href="{% url 'hotel' %}#hotels">
+                Знайти свій простір
             </a>
+
+            {% if user.is_authenticated %}
+                <span class="sl-navbar-user" title="{{ user.get_username }}">
+                    <span class="sl-navbar-avatar" aria-hidden="true">{{ user.get_username|first|upper }}</span>
+                    <span class="sl-navbar-username">{{ user.get_username }}</span>
+                </span>
+                <a class="sl-navbar-btn sl-navbar-btn--ghost" href="{% url 'logout' %}">Вийти</a>
+            {% else %}
+                <a class="sl-navbar-btn" href="{% url 'login' %}">Увійти</a>
+            {% endif %}
         </div>
 
     </div>
@@ -34,227 +43,234 @@
 <style>
     .sl-navbar {
         --nav-paper: #f5f2eb;
+        --nav-white: #fffdf8;
         --nav-ink: #202b25;
+        --nav-muted: #6f776f;
         --nav-green: #29483b;
+        --nav-green-dark: #1c332a;
+        --nav-lime: #d6e2a8;
         --nav-clay: #c87555;
+        --nav-line: rgba(32, 43, 37, .14);
 
         background: var(--nav-paper);
         color: var(--nav-ink);
+        font-family: inherit;
         position: relative;
-        z-index: 1000;
         width: 100%;
+        z-index: 1000;
     }
 
     .sl-navbar,
-    .sl-navbar * {
-        box-sizing: border-box;
-    }
+    .sl-navbar * { box-sizing: border-box; }
 
     .sl-navbar-inner {
-        width: min(1440px, calc(100% - 72px));
-        min-height: 82px;
-        margin: 0 auto;
-        display: flex;
         align-items: center;
-        justify-content: space-between;
+        border-bottom: 1px solid var(--nav-line);
+        display: flex;
         gap: 28px;
-        border-bottom: 1px solid rgba(32, 43, 37, .14);
+        justify-content: space-between;
+        margin: 0 auto;
+        min-height: 82px;
+        width: min(1440px, calc(100% - 72px));
     }
 
+    /* ---------- Brand ---------- */
     .sl-navbar-brand {
-        display: inline-flex;
         align-items: center;
+        color: var(--nav-ink);
+        display: inline-flex;
+        flex-shrink: 0;
         gap: 11px;
         text-decoration: none;
-        color: var(--nav-ink);
-        flex-shrink: 0;
     }
-
     .sl-brand-mark {
-        width: 38px;
-        height: 38px;
-        display: flex;
         align-items: center;
-        justify-content: center;
         border: 1px solid rgba(32, 43, 37, .45);
         border-radius: 50%;
+        display: flex;
+        height: 38px;
+        justify-content: center;
         transition: transform .3s ease, background .3s ease;
+        width: 38px;
     }
-
     .sl-brand-mark img {
         display: block;
-        width: 23px;
         height: 23px;
         object-fit: contain;
+        width: 23px;
     }
-
     .sl-navbar-brand:hover .sl-brand-mark {
-        transform: rotate(-12deg);
         background: #e8e4d9;
+        transform: rotate(-12deg);
     }
-
     .sl-brand-name {
         font-size: 24px;
         font-weight: 750;
         letter-spacing: -.075em;
     }
+    .sl-brand-name span { color: var(--nav-clay); }
 
-    .sl-brand-name span {
-        color: var(--nav-clay);
-    }
-
+    /* ---------- Menu ---------- */
     .sl-navbar-menu {
-        display: flex;
         align-items: center;
-        gap: 34px;
+        display: flex;
+        gap: 32px;
     }
 
     .sl-navbar-link {
-        color: #6f776f;
+        color: var(--nav-muted);
         font-size: 12px;
-        text-decoration: none;
-        position: relative;
         padding: 9px 0;
+        position: relative;
+        text-decoration: none;
         transition: color .2s ease;
     }
-
     .sl-navbar-link::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        right: 100%;
-        bottom: 2px;
-        height: 1px;
         background: var(--nav-clay);
+        bottom: 2px;
+        content: "";
+        height: 1px;
+        left: 0;
+        position: absolute;
+        right: 100%;
         transition: right .25s ease;
     }
-
     .sl-navbar-link:hover,
-    .sl-navbar-link.active {
-        color: var(--nav-ink);
-    }
-
+    .sl-navbar-link.active { color: var(--nav-ink); }
     .sl-navbar-link:hover::after,
-    .sl-navbar-link.active::after {
-        right: 0;
-    }
+    .sl-navbar-link.active::after { right: 0; }
 
-    .sl-navbar-cta {
-        display: inline-flex;
+    /* the only button in the header */
+    .sl-navbar-btn {
         align-items: center;
-        justify-content: center;
-        gap: 22px;
-        border: 1px solid var(--nav-green);
-        color: var(--nav-green);
-        border-radius: 999px;
-        padding: 12px 17px;
-        font-size: 11px;
-        text-decoration: none;
-        white-space: nowrap;
-        transition: background .25s ease, color .25s ease;
-    }
-
-    .sl-navbar-cta span {
-        font-size: 15px;
-        transition: transform .25s ease;
-    }
-
-    .sl-navbar-cta:hover {
         background: var(--nav-green);
-        color: #fffdf8;
-    }
-
-    .sl-navbar-cta:hover span {
-        transform: translate(2px, -2px);
-    }
-
-    .sl-navbar-toggler {
-        display: none;
-        border: 1px solid rgba(32, 43, 37, .2);
-        background: transparent;
-        border-radius: 50%;
-        width: 43px;
-        height: 43px;
-        padding: 0;
-        align-items: center;
+        border: 1px solid var(--nav-green);
+        border-radius: 999px;
+        color: #fff;
+        display: inline-flex;
+        font-size: 12px;
         justify-content: center;
+        padding: 11px 22px;
+        text-decoration: none;
+        transition: background .25s ease, color .25s ease, transform .25s ease;
+        white-space: nowrap;
+    }
+    .sl-navbar-btn:hover { background: var(--nav-green-dark); transform: translateY(-1px); }
+
+    .sl-navbar-btn--ghost {
+        background: transparent;
+        color: var(--nav-green);
+    }
+    .sl-navbar-btn--ghost:hover { background: var(--nav-green); color: var(--nav-white); }
+
+    .sl-navbar a:focus-visible,
+    .sl-navbar-toggler:focus-visible {
+        outline: 2px solid var(--nav-clay);
+        outline-offset: 3px;
+    }
+
+    /* user */
+    .sl-navbar-user {
+        align-items: center;
+        display: inline-flex;
+        font-size: 12px;
+        gap: 10px;
+    }
+    .sl-navbar-avatar {
+        align-items: center;
+        background: var(--nav-lime);
+        border-radius: 50%;
+        color: var(--nav-green-dark);
+        display: inline-flex;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 15px;
+        height: 34px;
+        justify-content: center;
+        width: 34px;
+    }
+    .sl-navbar-username {
+        max-width: 140px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* ---------- Toggler ---------- */
+    .sl-navbar-toggler {
+        align-items: center;
+        background: transparent;
+        border: 1px solid rgba(32, 43, 37, .2);
+        border-radius: 50%;
+        cursor: pointer;
+        display: none;
         flex-direction: column;
         gap: 5px;
-        cursor: pointer;
+        height: 43px;
+        justify-content: center;
+        padding: 0;
+        width: 43px;
     }
-
     .sl-navbar-toggler span {
+        background: var(--nav-ink);
         display: block;
         height: 1px;
-        width: 17px;
-        background: var(--nav-ink);
         transition: transform .2s ease;
+        width: 17px;
     }
+    .sl-navbar-toggler[aria-expanded="true"] span:first-child { transform: translateY(3px) rotate(45deg); }
+    .sl-navbar-toggler[aria-expanded="true"] span:last-child { transform: translateY(-3px) rotate(-45deg); }
 
-    .sl-navbar-toggler[aria-expanded="true"] span:first-child {
-        transform: translateY(3px) rotate(45deg);
-    }
-
-    .sl-navbar-toggler[aria-expanded="true"] span:last-child {
-        transform: translateY(-3px) rotate(-45deg);
+    /* ---------- Responsive ---------- */
+    @media (max-width: 900px) {
+        .sl-navbar-inner { width: calc(100% - 40px); }
+        .sl-navbar-menu { gap: 22px; }
+        .sl-navbar-username { display: none; }
     }
 
     @media (max-width: 700px) {
         .sl-navbar-inner {
-            width: calc(100% - 30px);
-            min-height: 70px;
             flex-wrap: wrap;
             gap: 0;
+            min-height: 70px;
             padding: 12px 0;
+            width: calc(100% - 30px);
         }
-
-        .sl-brand-name {
-            font-size: 22px;
-        }
-
-        .sl-brand-mark {
-            width: 35px;
-            height: 35px;
-        }
-
-        .sl-navbar-toggler {
-            display: flex;
-        }
+        .sl-brand-name { font-size: 22px; }
+        .sl-brand-mark { height: 35px; width: 35px; }
+        .sl-navbar-toggler { display: flex; }
 
         .sl-navbar-menu {
-            display: none;
             align-items: stretch;
+            display: none;
             flex-direction: column;
             gap: 0;
+            padding: 8px 0 6px;
             width: 100%;
-            padding: 12px 0 5px;
         }
+        .sl-navbar-menu.is-open { display: flex; }
 
-        .sl-navbar-menu.is-open {
-            display: flex;
-        }
-
-        .sl-navbar-link {
-            padding: 15px 3px;
+        .sl-navbar-link,
+        .sl-navbar-user {
             border-bottom: 1px solid rgba(32, 43, 37, .1);
+            font-size: 14px;
+            padding: 16px 2px;
         }
+        .sl-navbar-link::after { display: none; }
+        .sl-navbar-link.active { color: var(--nav-ink); }
+        .sl-navbar-username { display: inline; max-width: none; }
 
-        .sl-navbar-link::after {
-            display: none;
-        }
-
-        .sl-navbar-cta {
+        .sl-navbar-btn {
             align-self: flex-start;
-            margin-top: 14px;
+            font-size: 13px;
+            margin: 16px 0 6px;
+            padding: 11px 26px;
         }
     }
 
     @media (prefers-reduced-motion: reduce) {
         .sl-navbar *,
         .sl-navbar *::before,
-        .sl-navbar *::after {
-            transition: none !important;
-        }
+        .sl-navbar *::after { transition: none !important; }
     }
 </style>
 
@@ -265,21 +281,24 @@
 
     const toggle = navbar.querySelector('.sl-navbar-toggler');
     const menu = navbar.querySelector('.sl-navbar-menu');
-
     if (!toggle || !menu) return;
 
-    toggle.addEventListener('click', function () {
-        const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+    function setOpen(open) {
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.setAttribute('aria-label', open ? 'Закрити меню' : 'Відкрити меню');
+        menu.classList.toggle('is-open', open);
+    }
 
-        toggle.setAttribute('aria-expanded', String(!isOpen));
-        menu.classList.toggle('is-open', !isOpen);
+    toggle.addEventListener('click', function () {
+        setOpen(toggle.getAttribute('aria-expanded') !== 'true');
     });
 
     menu.querySelectorAll('a').forEach(function (link) {
-        link.addEventListener('click', function () {
-            toggle.setAttribute('aria-expanded', 'false');
-            menu.classList.remove('is-open');
-        });
+        link.addEventListener('click', function () { setOpen(false); });
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') setOpen(false);
     });
 })();
 </script>

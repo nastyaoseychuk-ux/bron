@@ -1,0 +1,505 @@
+{% extends 'base.html' %}
+{% load l10n %}
+
+{% block title %}Бронювання — {{ room.hotel.name }} — StayLux{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --sl-ink: #202b25;
+        --sl-muted: #6f776f;
+        --sl-paper: #f5f2eb;
+        --sl-white: #fffdf8;
+        --sl-green: #29483b;
+        --sl-green-dark: #1c332a;
+        --sl-lime: #d6e2a8;
+        --sl-clay: #c87555;
+        --sl-line: rgba(32, 43, 37, .14);
+    }
+
+    .sl-page {
+        background: var(--sl-paper);
+        color: var(--sl-ink);
+        font-family: inherit;
+        min-height: 100vh;
+        overflow: hidden;
+        padding: 0 0 70px;
+        /* breakout from narrow wrapper in base.html */
+        width: 100vw;
+        max-width: none;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+    }
+    .sl-page * { box-sizing: border-box; }
+    .sl-page a { color: inherit; }
+    .sl-page .sl-shell {
+        width: min(1240px, calc(100% - 72px));
+        margin: 0 auto;
+    }
+
+    .sl-eyebrow {
+        align-items: center;
+        color: var(--sl-clay);
+        display: flex;
+        font-size: 10px;
+        font-weight: 800;
+        gap: 10px;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+    }
+    .sl-eyebrow::before { background: currentColor; content: ""; height: 1px; width: 27px; }
+
+    .sl-back {
+        color: var(--sl-muted);
+        display: inline-block;
+        font-size: 12px;
+        margin: 34px 0 0;
+        text-decoration: none;
+        transition: color .2s;
+    }
+    .sl-back:hover { color: var(--sl-clay); }
+
+    .sl-head { margin: 22px 0 34px; }
+    .sl-head h1 {
+        font-size: clamp(40px, 5.4vw, 72px);
+        font-weight: 500;
+        letter-spacing: -.085em;
+        line-height: .95;
+        margin: 18px 0 0;
+    }
+    .sl-head h1 em {
+        color: var(--sl-green);
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: 400;
+        letter-spacing: -.075em;
+    }
+
+    /* ---------- Layout ---------- */
+    .sl-book {
+        align-items: start;
+        display: grid;
+        gap: clamp(22px, 3vw, 44px);
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+    }
+
+    /* ---------- Form card ---------- */
+    .sl-card {
+        background: var(--sl-white);
+        border: 1px solid var(--sl-line);
+        border-radius: 24px;
+        padding: clamp(24px, 3.4vw, 40px);
+    }
+
+    .sl-group + .sl-group {
+        border-top: 1px solid var(--sl-line);
+        margin-top: 28px;
+        padding-top: 28px;
+    }
+    .sl-group h2 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 24px;
+        font-weight: 400;
+        letter-spacing: -.04em;
+        margin: 0 0 18px;
+    }
+
+    .sl-grid { display: grid; gap: 16px; }
+    .sl-grid.two { grid-template-columns: 1fr 1fr; }
+
+    .sl-field label {
+        color: var(--sl-muted);
+        display: block;
+        font-size: 11px;
+        margin-bottom: 7px;
+    }
+    .sl-field input {
+        background: var(--sl-paper);
+        border: 1px solid var(--sl-line);
+        border-radius: 14px;
+        color: var(--sl-ink);
+        font: inherit;
+        font-size: 14px;
+        outline: none;
+        padding: 14px 16px;
+        transition: border-color .2s, background .2s, box-shadow .2s;
+        width: 100%;
+    }
+    .sl-field input::placeholder { color: #9b9e95; }
+    .sl-field input:focus {
+        background: var(--sl-white);
+        border-color: var(--sl-green);
+        box-shadow: 0 0 0 3px rgba(41, 72, 59, .12);
+    }
+    .sl-field.has-error input { border-color: var(--sl-clay); }
+
+    .sl-field .errorlist,
+    .sl-errors .errorlist {
+        color: var(--sl-clay);
+        font-size: 12px;
+        line-height: 1.5;
+        list-style: none;
+        margin: 7px 0 0;
+        padding: 0;
+    }
+    .sl-errors {
+        background: rgba(200, 117, 85, .09);
+        border: 1px solid rgba(200, 117, 85, .35);
+        border-radius: 14px;
+        margin-bottom: 22px;
+        padding: 12px 16px;
+    }
+    .sl-errors .errorlist { margin: 0; }
+
+    .sl-submit-row {
+        align-items: center;
+        display: flex;
+        gap: 20px;
+        justify-content: space-between;
+        margin-top: 32px;
+    }
+    .sl-submit {
+        align-items: center;
+        background: var(--sl-green);
+        border: 1px solid var(--sl-green);
+        border-radius: 999px;
+        color: white;
+        cursor: pointer;
+        display: inline-flex;
+        font: inherit;
+        font-size: 13px;
+        gap: 25px;
+        justify-content: space-between;
+        padding: 16px 22px;
+        text-decoration: none;
+        transition: background .2s, transform .2s;
+    }
+    .sl-submit:hover { background: var(--sl-green-dark); transform: translateY(-2px); }
+    .sl-submit:focus-visible { outline: 2px solid var(--sl-clay); outline-offset: 3px; }
+    .sl-submit[disabled] { cursor: not-allowed; opacity: .45; transform: none; }
+    .sl-note { color: var(--sl-muted); font-size: 11px; line-height: 1.6; max-width: 200px; }
+
+    /* ---------- Summary ---------- */
+    .sl-side { position: sticky; top: 24px; }
+    .sl-summary { padding: 14px 14px 14px; }
+
+    .sl-summary-img {
+        background: #e2dfd5;
+        border-radius: 18px;
+        height: 230px;
+        overflow: hidden;
+    }
+    .sl-summary-img img { display: block; height: 100%; object-fit: cover; width: 100%; }
+
+    .sl-summary-body { padding: 20px 12px 8px; }
+    .sl-location {
+        color: var(--sl-clay);
+        font-size: 10px;
+        font-weight: 750;
+        letter-spacing: .11em;
+        margin-bottom: 9px;
+        text-transform: uppercase;
+    }
+    .sl-summary h3 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 28px;
+        font-weight: 400;
+        letter-spacing: -.04em;
+        margin: 0 0 6px;
+    }
+    .sl-room-line { color: var(--sl-muted); font-size: 13px; margin: 0; }
+
+    .sl-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 4px; }
+    .sl-tag {
+        border: 1px solid var(--sl-line);
+        border-radius: 999px;
+        color: var(--sl-muted);
+        font-size: 10px;
+        padding: 6px 9px;
+    }
+
+    .sl-rows { border-top: 1px solid var(--sl-line); margin-top: 18px; padding-top: 6px; }
+    .sl-row {
+        align-items: baseline;
+        color: var(--sl-muted);
+        display: flex;
+        font-size: 12px;
+        justify-content: space-between;
+        padding: 9px 0;
+    }
+    .sl-row strong { color: var(--sl-ink); font-size: 13px; font-weight: 600; }
+
+    .sl-total {
+        background: var(--sl-green);
+        border-radius: 18px;
+        color: var(--sl-white);
+        margin-top: 14px;
+        overflow: hidden;
+        padding: 22px 24px;
+        position: relative;
+    }
+    .sl-total::after {
+        border: 1px solid rgba(255,255,255,.15);
+        border-radius: 50%;
+        content: "";
+        height: 200px;
+        pointer-events: none;
+        position: absolute;
+        right: -70px;
+        top: -100px;
+        width: 200px;
+    }
+    .sl-total small { color: var(--sl-lime); display: block; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; }
+    .sl-total strong {
+        display: block;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 36px;
+        font-weight: 400;
+        letter-spacing: -.04em;
+        margin-top: 6px;
+    }
+    .sl-total strong span { color: rgba(255,255,255,.7); font-family: inherit; font-size: 14px; letter-spacing: 0; }
+
+    /* ---------- Notice / success ---------- */
+    .sl-notice { padding: clamp(32px, 6vw, 64px); text-align: center; }
+    .sl-notice .sl-eyebrow { justify-content: center; }
+    .sl-notice h2 {
+        font-size: clamp(34px, 4.6vw, 54px);
+        font-weight: 500;
+        letter-spacing: -.07em;
+        line-height: 1;
+        margin: 16px 0 14px;
+    }
+    .sl-notice h2 em { color: var(--sl-green); font-family: Georgia, serif; font-weight: 400; }
+    .sl-notice p { color: var(--sl-muted); font-size: 14px; line-height: 1.8; margin: 0 auto 26px; max-width: 420px; }
+
+    .sl-bottom-line {
+        align-items: center;
+        border-top: 1px solid var(--sl-line);
+        color: var(--sl-muted);
+        display: flex;
+        font-size: 10px;
+        gap: 20px;
+        justify-content: space-between;
+        margin-top: 70px;
+        padding-top: 22px;
+    }
+    .sl-bottom-line strong { color: var(--sl-ink); font-size: 13px; letter-spacing: -.04em; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 900px) {
+        .sl-page .sl-shell { width: calc(100% - 40px); }
+        .sl-book { grid-template-columns: 1fr; }
+        .sl-side { order: -1; position: static; }
+        .sl-summary-img { height: 200px; }
+    }
+
+    @media (max-width: 640px) {
+        .sl-page .sl-shell { width: calc(100% - 30px); }
+        .sl-back { margin-top: 24px; }
+        .sl-head { margin: 18px 0 24px; }
+        .sl-card { border-radius: 18px; }
+        .sl-grid.two { grid-template-columns: 1fr; }
+        .sl-submit-row { align-items: flex-start; flex-direction: column; }
+        .sl-submit { justify-content: space-between; width: 100%; }
+        .sl-bottom-line { align-items: flex-start; flex-direction: column; gap: 8px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .sl-page *, .sl-page *::before, .sl-page *::after { transition-duration: .01ms !important; }
+    }
+</style>
+
+<div class="sl-page" data-price="{{ room.price_per_night|unlocalize }}">
+    <div class="sl-shell">
+
+        <a class="sl-back" href="{% url 'hotel_rooms' room.hotel.id %}">← Усі номери {{ room.hotel.name }}</a>
+
+        {% if booking %}
+            {# ---------- Success ---------- #}
+            <div class="sl-head">
+                <div class="sl-eyebrow">Бронювання</div>
+            </div>
+            <div class="sl-card sl-notice">
+                <div class="sl-eyebrow">Готово</div>
+                <h2>Номер <em>заброньовано.</em></h2>
+                <p>
+                    {{ room.hotel.name }}, номер {{ room.room_number }}:
+                    {{ booking.check_in_date|date:"d.m.Y" }} — {{ booking.check_out_date|date:"d.m.Y" }}.
+                    Деталі ми надіслали б на {{ booking.email }}.
+                </p>
+                <a class="sl-submit" href="{% url 'hotel' %}">Повернутись до колекції <span aria-hidden="true">↗</span></a>
+            </div>
+
+        {% else %}
+            <div class="sl-head">
+                <div class="sl-eyebrow">Бронювання</div>
+                <h1>Забронюй<br>свій <em>номер.</em></h1>
+            </div>
+
+            <div class="sl-book">
+
+                {# ---------- Form ---------- #}
+                <section class="sl-card" aria-label="Форма бронювання">
+                    {% if not room.is_available %}
+                        <div class="sl-notice" style="padding:20px 0;">
+                            <div class="sl-eyebrow">Недоступно</div>
+                            <h2>Цей номер <em>зайнятий.</em></h2>
+                            <p>Подивись інші номери цього готелю — можливо, там знайдеться потрібний.</p>
+                            <a class="sl-submit" href="{% url 'hotel_rooms' room.hotel.id %}">Інші номери <span aria-hidden="true">↗</span></a>
+                        </div>
+                    {% else %}
+                        <form action="" method="post" novalidate>
+                            {% csrf_token %}
+
+                            {% if form.non_field_errors %}
+                                <div class="sl-errors" role="alert">{{ form.non_field_errors }}</div>
+                            {% endif %}
+
+                            <div class="sl-group">
+                                <h2>Ваші дані</h2>
+                                <div class="sl-grid">
+                                    <div class="sl-field{% if form.name.errors %} has-error{% endif %}">
+                                        {{ form.name.label_tag }}
+                                        {{ form.name }}
+                                        {{ form.name.errors }}
+                                    </div>
+                                    <div class="sl-grid two">
+                                        <div class="sl-field{% if form.phone.errors %} has-error{% endif %}">
+                                            {{ form.phone.label_tag }}
+                                            {{ form.phone }}
+                                            {{ form.phone.errors }}
+                                        </div>
+                                        <div class="sl-field{% if form.email.errors %} has-error{% endif %}">
+                                            {{ form.email.label_tag }}
+                                            {{ form.email }}
+                                            {{ form.email.errors }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="sl-group">
+                                <h2>Дати проживання</h2>
+                                <div class="sl-grid two">
+                                    <div class="sl-field{% if form.check_in_date.errors %} has-error{% endif %}">
+                                        {{ form.check_in_date.label_tag }}
+                                        {{ form.check_in_date }}
+                                        {{ form.check_in_date.errors }}
+                                    </div>
+                                    <div class="sl-field{% if form.check_out_date.errors %} has-error{% endif %}">
+                                        {{ form.check_out_date.label_tag }}
+                                        {{ form.check_out_date }}
+                                        {{ form.check_out_date.errors }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="sl-submit-row">
+                                <button type="submit" class="sl-submit">
+                                    Підтвердити бронювання <span aria-hidden="true">↗</span>
+                                </button>
+                                <span class="sl-note">Оплата — під час заселення.</span>
+                            </div>
+                        </form>
+                    {% endif %}
+                </section>
+
+                {# ---------- Summary ---------- #}
+                <aside class="sl-side" aria-label="Ваш номер">
+                    <div class="sl-card sl-summary">
+                        <div class="sl-summary-img">
+                            {% with img=room.images.first %}
+                                {% if img %}
+                                    <img src="{{ img.image.url }}" alt="Номер {{ room.room_number }}">
+                                {% else %}
+                                    {% with himg=room.hotel.images.first %}
+                                        {% if himg %}
+                                            <img src="{{ himg.image.url }}" alt="{{ room.hotel.name }}">
+                                        {% else %}
+                                            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=900&q=80" alt="{{ room.hotel.name }}">
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+
+                        <div class="sl-summary-body">
+                            <div class="sl-location">{{ room.hotel.location.city }}, {{ room.hotel.location.country }}</div>
+                            <h3>{{ room.hotel.name }}</h3>
+                            <p class="sl-room-line">Номер {{ room.room_number }} · {{ room.get_room_type_display }}</p>
+
+                            <div class="sl-tags">
+                                <span class="sl-tag">До {{ room.capacity }} гостей</span>
+                                {% for amenity in room.hotel.amenities.all|slice:":2" %}
+                                    <span class="sl-tag">{{ amenity.name }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="sl-rows">
+                                <div class="sl-row"><span>Ціна за ніч</span><strong>{{ room.price_per_night }} грн</strong></div>
+                                <div class="sl-row"><span>Кількість ночей</span><strong id="nightsValue">—</strong></div>
+                            </div>
+
+                            <div class="sl-total" aria-live="polite">
+                                <small>Разом</small>
+                                <strong id="totalValue">—</strong>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+            </div>
+        {% endif %}
+
+        <footer class="sl-bottom-line">
+            <strong>staylux<span style="color:var(--sl-clay);">.</span></strong>
+            <span>Місця, які залишаються з тобою.</span>
+            <span>Обирай не просто адресу — обирай відчуття.</span>
+        </footer>
+    </div>
+</div>
+
+<script>
+(function () {
+    const page = document.querySelector('.sl-page');
+    const inEl = document.getElementById('id_check_in_date');
+    const outEl = document.getElementById('id_check_out_date');
+    const nightsEl = document.getElementById('nightsValue');
+    const totalEl = document.getElementById('totalValue');
+    if (!page || !inEl || !outEl || !nightsEl || !totalEl) return;
+
+    const price = parseFloat(page.dataset.price);
+
+    function toISO(d) {
+        const off = d.getTimezoneOffset() * 60000;
+        return new Date(d - off).toISOString().slice(0, 10);
+    }
+
+    inEl.min = toISO(new Date());
+
+    function update() {
+        const a = inEl.value ? new Date(inEl.value) : null;
+        const b = outEl.value ? new Date(outEl.value) : null;
+
+        if (a) {
+            const next = new Date(a);
+            next.setDate(next.getDate() + 1);
+            outEl.min = toISO(next);
+        }
+
+        if (a && b && b > a && !isNaN(price)) {
+            const nights = Math.round((b - a) / 86400000);
+            nightsEl.textContent = nights;
+            totalEl.innerHTML = (nights * price).toLocaleString('uk-UA') + ' <span>грн</span>';
+        } else {
+            nightsEl.textContent = '—';
+            totalEl.textContent = '—';
+        }
+    }
+
+    inEl.addEventListener('change', update);
+    outEl.addEventListener('change', update);
+    update();
+})();
+</script>
+{% endblock %}

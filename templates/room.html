@@ -472,7 +472,7 @@
                 </p>
 
                 {% if room.is_available %}
-                    <a href="{% url 'hotel_rooms' room.hotel.pk %}" class="sl-detail-booking-btn">
+                    <a href="{% url 'booking' room.hotel.pk %}" class="sl-detail-booking-btn">
                         Обрати номер <span aria-hidden="true">↗</span>
                     </a>
                 {% else %}
