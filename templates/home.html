@@ -715,7 +715,7 @@
                         <article
                             class="sl-hotel-card hotel-item"
                             data-name="{{ hotel.name|lower }}"
-                            data-city="{{ hotel.location.city|lower }}"
+                            data-city="{{ hotel.city|lower }}"
                         >
                             <a class="sl-hotel-image" href="{% url 'hotel_rooms' hotel.id %}" aria-label="Переглянути номери: {{ hotel.name }}">
                                 {% with first_image=hotel.images.first %}
@@ -729,7 +729,7 @@
                             </a>
 
                             <div class="sl-hotel-content">
-                                <div class="sl-hotel-location">{{ hotel.location.city }}, {{ hotel.location.country }}</div>
+                                <div class="sl-hotel-location">{{ hotel.city }}, {{ hotel.country }}</div>
                                 <h3>{{ hotel.name }}</h3>
                                 <p class="sl-hotel-description">{{ hotel.description|truncatewords:24 }}</p>
 

@@ -1,10 +1,9 @@
 from django.contrib import admin
-from .models import Hotel, Room, Booking, RoomImage, Location, HotelImage, Review, Amenite
+from .models import Hotel, Room, Booking, RoomImage, HotelImage, Review, Amenite
 
 admin.site.register(Hotel)
 admin.site.register(Room)
 admin.site.register(Booking)
-admin.site.register(Location)
 admin.site.register(HotelImage)
 admin.site.register(RoomImage)
 admin.site.register(Review)

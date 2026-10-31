@@ -1,13 +1,5 @@
 from django.db import models
 
-class Location(models.Model):
-    country = models.CharField(max_length=100)
-    city = models.CharField(max_length=100)
-    address = models.CharField(max_length=200)
-
-    def __str__(self):
-        return f"{self.city}, {self.country}"
-
 class Amenite(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -19,8 +11,10 @@ class Hotel(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     price_per_night = models.DecimalField(max_digits=10, decimal_places=2)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name='hotels')
     amenities = models.ManyToManyField(Amenite, related_name='hotels', blank=True)
+    country = models.CharField(max_length=100)
+    city = models.CharField(max_length=100)
+    address = models.CharField(max_length=200)
 
     def __str__(self):
         return self.name

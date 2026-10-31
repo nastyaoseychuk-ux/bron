@@ -9,9 +9,7 @@ from .models import Hotel, Room
 from .forms import BookingForm
 
 def hotel(request):
-    hotels = Hotel.objects.select_related('location').prefetch_related(
-        'images', 'amenities', 'rooms'
-    )
+    hotels = Hotel.objects.prefetch_related('images', 'amenities', 'rooms')
 
     return render(request, 'home.html', {'hotels': hotels})
 
@@ -32,7 +30,7 @@ def room(request, id):
 
 @login_required
 def booking(request, id):
-    room = get_object_or_404(Room.objects.select_related('hotel__location'), id=id)
+    room = get_object_or_404(Room.objects.select_related('hotel'), id=id)
     form = BookingForm(
         request.POST or None,
         room=room,

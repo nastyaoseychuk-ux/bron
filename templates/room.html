@@ -397,7 +397,7 @@
                 <div class="sl-detail-eyebrow">Your private space</div>
                 <h1>Номер {{ room.room_number }}<br><em>для твого відпочинку.</em></h1>
                 <div class="sl-detail-location">
-                    {{ room.hotel.name }} · {{ room.hotel.location.city }}, {{ room.hotel.location.country }}
+                    {{ room.hotel.name }} · {{ room.hotel.city }}, {{ room.hotel.country }}
                 </div>
             </div>
 
@@ -457,7 +457,7 @@
                     </div>
                     <div class="sl-detail-fact">
                         <span>Місто</span>
-                        <strong>{{ room.hotel.location.city }}</strong>
+                        <strong>{{ room.hotel.city }}</strong>
                     </div>
                 </div>
 
@@ -472,7 +472,7 @@
                 </p>
 
                 {% if room.is_available %}
-                    <a href="{% url 'booking' room.hotel.pk %}" class="sl-detail-booking-btn">
+                    <a href="{% url 'booking' room.pk %}" class="sl-detail-booking-btn">
                         Обрати номер <span aria-hidden="true">↗</span>
                     </a>
                 {% else %}
