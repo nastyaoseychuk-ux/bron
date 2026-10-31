@@ -315,17 +315,15 @@
         <a class="sl-back" href="{% url 'hotel_rooms' room.hotel.id %}">← Усі номери {{ room.hotel.name }}</a>
 
         {% if booking %}
-            {# ---------- Success ---------- #}
             <div class="sl-head">
                 <div class="sl-eyebrow">Бронювання</div>
             </div>
             <div class="sl-card sl-notice">
                 <div class="sl-eyebrow">Готово</div>
-                <h2>Номер <em>заброньовано.</em></h2>
+                <h2>{{booking.name}}, ваш номер <em>заброньовано.</em></h2>
                 <p>
                     {{ room.hotel.name }}, номер {{ room.room_number }}:
                     {{ booking.check_in_date|date:"d.m.Y" }} — {{ booking.check_out_date|date:"d.m.Y" }}.
-                    Деталі ми надіслали б на {{ booking.email }}.
                 </p>
                 <a class="sl-submit" href="{% url 'hotel' %}">Повернутись до колекції <span aria-hidden="true">↗</span></a>
             </div>
@@ -338,7 +336,7 @@
 
             <div class="sl-book">
 
-                {# ---------- Form ---------- #}
+                {#form#}
                 <section class="sl-card" aria-label="Форма бронювання">
                     {% if not room.is_available %}
                         <div class="sl-notice" style="padding:20px 0;">
@@ -404,7 +402,6 @@
                     {% endif %}
                 </section>
 
-                {# ---------- Summary ---------- #}
                 <aside class="sl-side" aria-label="Ваш номер">
                     <div class="sl-card sl-summary">
                         <div class="sl-summary-img">

@@ -1,11 +1,12 @@
-
+from django.shortcuts import redirect
+from django.views.decorators.http import require_POST
 from django.shortcuts import render, get_object_or_404
 from .models import Hotel, Room
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 
-from .models import Hotel, Room
+from .models import Hotel, Room, Booking
 from .forms import BookingForm
 
 def hotel(request):
@@ -49,3 +50,21 @@ def booking(request, id):
         return render(request, 'booking.html', {'room': room, 'booking': new_booking})
 
     return render(request, 'booking.html', {'room': room, 'form': form})
+
+@login_required
+def my_bookings(request):
+    bookings = (
+        Booking.objects
+        .filter(user=request.user)
+        .select_related('hotel', 'room')
+        .order_by('-created_at')
+    )
+    return render(request, 'my_bookings.html', {'bookings': bookings})
+
+
+@login_required
+@require_POST
+def delete_booking(request, id):
+    booking = get_object_or_404(Booking, id=id, user=request.user)  # лише власні бронювання
+    booking.delete()
+    return redirect('my_bookings')

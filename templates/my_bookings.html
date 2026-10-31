@@ -1,0 +1,562 @@
+{% extends 'base.html' %}
+
+{% block title %}Мої бронювання | StayLux{% endblock %}
+
+{% block content %}
+<style>
+    /* StayLux — editorial hospitality design (Мої бронювання) */
+    :root {
+        --sl-ink: #202b25;
+        --sl-muted: #6f776f;
+        --sl-paper: #f5f2eb;
+        --sl-white: #fffdf8;
+        --sl-green: #29483b;
+        --sl-green-dark: #1c332a;
+        --sl-lime: #d6e2a8;
+        --sl-clay: #c87555;
+        --sl-line: rgba(32, 43, 37, .14);
+    }
+
+    /* прибирає горизонтальний скрол від full-width блоку */
+    html, body { overflow-x: hidden; }
+
+    .sl-bookings {
+        background: var(--sl-paper);
+        color: var(--sl-ink);
+        min-height: 100vh;
+        padding: 30px 0 80px;
+        width: 100vw;
+        max-width: none;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+        overflow: hidden;
+    }
+    .sl-bookings, .sl-bookings * { box-sizing: border-box; }
+    .sl-bookings a { color: inherit; }
+
+    .sl-bk-shell { width: min(1180px, calc(100% - 72px)); margin: 0 auto; }
+
+    /* Back link */
+    .sl-bk-back {
+        align-items: center;
+        color: var(--sl-muted);
+        display: inline-flex;
+        font-size: 12px;
+        gap: 12px;
+        text-decoration: none;
+        transition: color .2s ease;
+    }
+    .sl-bk-back span {
+        align-items: center;
+        border: 1px solid var(--sl-line);
+        border-radius: 50%;
+        display: inline-flex;
+        height: 35px;
+        justify-content: center;
+        transition: background .2s, color .2s, transform .2s;
+        width: 35px;
+    }
+    .sl-bk-back:hover { color: var(--sl-green); }
+    .sl-bk-back:hover span { background: var(--sl-green); color: white; transform: translateX(-3px); }
+
+    /* Heading */
+    .sl-bk-heading {
+        align-items: end;
+        display: flex;
+        gap: 28px;
+        justify-content: space-between;
+        margin: 34px 0 36px;
+    }
+    .sl-bk-eyebrow {
+        align-items: center;
+        color: var(--sl-clay);
+        display: flex;
+        font-size: 10px;
+        font-weight: 800;
+        gap: 10px;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+    }
+    .sl-bk-eyebrow::before { background: currentColor; content: ""; height: 1px; width: 27px; }
+    .sl-bk-heading h1 {
+        font-size: clamp(46px, 6vw, 82px);
+        font-weight: 500;
+        letter-spacing: -.08em;
+        line-height: .96;
+        margin: 20px 0 0;
+    }
+    .sl-bk-heading h1 em {
+        color: var(--sl-green);
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: 400;
+        letter-spacing: -.065em;
+    }
+    .sl-bk-count {
+        border: 1px solid rgba(41, 72, 59, .22);
+        border-radius: 999px;
+        color: var(--sl-green);
+        flex-shrink: 0;
+        font-size: 11px;
+        padding: 10px 14px;
+        white-space: nowrap;
+    }
+    .sl-bk-count strong { margin-right: 5px; }
+
+    /* List */
+    .sl-bk-list { display: grid; gap: 26px; }
+
+    .sl-bk-card {
+        background: var(--sl-white);
+        border: 1px solid var(--sl-line);
+        border-radius: 22px;
+        display: grid;
+        gap: 28px;
+        grid-template-columns: 300px minmax(0, 1fr);
+        padding: 14px;
+    }
+    .sl-bk-card.is-past .sl-bk-image img { filter: grayscale(.55); opacity: .85; }
+
+    .sl-bk-image {
+        background: #e4e0d6;
+        border-radius: 17px;
+        min-height: 260px;
+        overflow: hidden;
+        position: relative;
+    }
+    .sl-bk-image img {
+        display: block;
+        height: 100%;
+        inset: 0;
+        object-fit: cover;
+        position: absolute;
+        width: 100%;
+    }
+    .sl-bk-room-tag {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 253, 248, .9);
+        border-radius: 999px;
+        font-size: 11px;
+        left: 12px;
+        padding: 8px 12px;
+        position: absolute;
+        top: 12px;
+    }
+
+    /* Content */
+    .sl-bk-body {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        min-width: 0;
+        padding: 8px 12px 8px 0;
+    }
+    .sl-bk-top {
+        align-items: start;
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+    }
+    .sl-bk-location {
+        color: var(--sl-clay);
+        font-size: 10px;
+        font-weight: 750;
+        letter-spacing: .11em;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+    }
+    .sl-bk-body h3 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(26px, 2.6vw, 34px);
+        font-weight: 400;
+        letter-spacing: -.04em;
+        line-height: 1.1;
+        margin: 0 0 8px;
+        overflow-wrap: anywhere;
+    }
+    .sl-bk-room-line { color: var(--sl-muted); font-size: 12px; margin: 0; }
+
+    .sl-bk-status {
+        border: 1px solid rgba(41, 72, 59, .22);
+        border-radius: 999px;
+        color: var(--sl-green);
+        flex-shrink: 0;
+        font-size: 11px;
+        padding: 8px 12px;
+        white-space: nowrap;
+    }
+    .sl-bk-status:empty { display: none; }
+    .sl-bk-status.is-now { background: var(--sl-lime); border-color: var(--sl-lime); color: var(--sl-green-dark); }
+    .sl-bk-status.is-past { border-color: var(--sl-line); color: var(--sl-muted); }
+
+    /* Dates strip */
+    .sl-bk-range {
+        align-items: center;
+        background: var(--sl-paper);
+        border-radius: 15px;
+        display: grid;
+        gap: 18px;
+        grid-template-columns: auto 1fr auto;
+        padding: 16px 22px;
+    }
+    .sl-bk-day small { color: var(--sl-muted); display: block; font-size: 10px; margin-bottom: 4px; }
+    .sl-bk-day strong {
+        display: block;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 30px;
+        font-weight: 400;
+        letter-spacing: -.05em;
+        line-height: 1;
+    }
+    .sl-bk-day span { color: var(--sl-muted); display: block; font-size: 11px; margin-top: 4px; }
+    .sl-bk-day:last-child { text-align: right; }
+
+    .sl-bk-nights {
+        align-items: center;
+        color: var(--sl-muted);
+        display: flex;
+        font-size: 11px;
+        gap: 10px;
+        justify-content: center;
+        white-space: nowrap;
+    }
+    .sl-bk-nights::before, .sl-bk-nights::after {
+        background: var(--sl-line);
+        content: "";
+        flex: 1;
+        height: 1px;
+        min-width: 14px;
+    }
+    .sl-bk-nights strong { color: var(--sl-ink); }
+
+    /* Bottom: guest + total */
+    .sl-bk-bottom {
+        align-items: end;
+        border-top: 1px solid var(--sl-line);
+        display: grid;
+        gap: 24px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        padding-top: 18px;
+    }
+    .sl-bk-guest {
+        display: grid;
+        gap: 12px 28px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin: 0;
+    }
+    .sl-bk-guest dt { color: var(--sl-muted); font-size: 10px; margin-bottom: 3px; }
+    .sl-bk-guest dd { font-size: 12px; font-weight: 650; margin: 0; overflow-wrap: anywhere; }
+
+    .sl-bk-total { min-width: 230px; text-align: right; }
+    .sl-bk-total-caption { color: var(--sl-muted); display: block; font-size: 11px; margin-bottom: 4px; }
+    .sl-bk-total-price {
+        font-size: clamp(30px, 3.2vw, 40px);
+        font-weight: 750;
+        letter-spacing: -.065em;
+        line-height: 1;
+        white-space: nowrap;
+    }
+    .sl-bk-total-price small { color: var(--sl-muted); font-size: 13px; font-weight: 400; letter-spacing: 0; }
+    .sl-bk-night-price {
+        align-items: baseline;
+        display: flex;
+        font-size: 12px;
+        gap: 14px;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--sl-line);
+    }
+    .sl-bk-night-price span { color: var(--sl-muted); }
+    .sl-bk-night-price strong { font-weight: 650; white-space: nowrap; }
+
+    /* Delete */
+    .sl-bk-delete-form { margin: 0; }
+    .sl-bk-delete {
+        background: transparent;
+        border: 1px solid rgba(200, 117, 85, .45);
+        border-radius: 999px;
+        color: #a65336;
+        cursor: pointer;
+        font: inherit;
+        font-size: 12px;
+        padding: 10px 16px;
+        transition: background .2s, color .2s, border-color .2s;
+    }
+    .sl-bk-delete:hover { background: var(--sl-clay); border-color: var(--sl-clay); color: white; }
+    .sl-bk-delete:focus-visible, .sl-bk-dialog button:focus-visible { outline: 2px solid var(--sl-green); outline-offset: 2px; }
+
+    .sl-bk-dialog {
+        background: var(--sl-white);
+        border: 1px solid var(--sl-line);
+        border-radius: 22px;
+        color: var(--sl-ink);
+        max-width: 420px;
+        padding: 32px;
+        width: calc(100% - 40px);
+    }
+    .sl-bk-dialog::backdrop { background: rgba(28, 51, 42, .45); }
+    .sl-bk-dialog h3 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 28px;
+        font-weight: 400;
+        letter-spacing: -.04em;
+        line-height: 1.1;
+        margin: 0 0 12px;
+    }
+    .sl-bk-dialog p { color: var(--sl-muted); font-size: 13px; line-height: 1.8; margin: 0 0 24px; overflow-wrap: anywhere; }
+    .sl-bk-dialog-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .sl-bk-dialog button {
+        border-radius: 999px;
+        cursor: pointer;
+        font: inherit;
+        font-size: 12px;
+        padding: 13px 20px;
+        transition: background .2s;
+    }
+    .sl-bk-dialog-keep { background: transparent; border: 1px solid var(--sl-ink); color: var(--sl-ink); }
+    .sl-bk-dialog-keep:hover { background: var(--sl-paper); }
+    .sl-bk-dialog-confirm { background: var(--sl-clay); border: 1px solid var(--sl-clay); color: white; }
+    .sl-bk-dialog-confirm:hover { background: #a65336; border-color: #a65336; }
+
+    /* Empty state */
+    .sl-bk-empty {
+        background: var(--sl-white);
+        border: 1px dashed var(--sl-line);
+        border-radius: 22px;
+        color: var(--sl-muted);
+        padding: 70px 24px;
+        text-align: center;
+    }
+    .sl-bk-empty .sl-bk-eyebrow { justify-content: center; }
+    .sl-bk-empty h3 {
+        color: var(--sl-ink);
+        font-family: Georgia, serif;
+        font-size: clamp(26px, 3vw, 34px);
+        font-weight: 400;
+        letter-spacing: -.04em;
+        margin: 18px 0 10px;
+    }
+    .sl-bk-empty p { font-size: 13px; line-height: 1.8; margin: 0 auto; max-width: 380px; }
+
+    @media (max-width: 900px) {
+        .sl-bk-shell { width: calc(100% - 40px); }
+        .sl-bk-card { grid-template-columns: 220px minmax(0, 1fr); gap: 20px; }
+    }
+
+    @media (max-width: 680px) {
+        .sl-bookings { padding-top: 24px; }
+        .sl-bk-shell { width: calc(100% - 30px); }
+        .sl-bk-heading { align-items: flex-start; flex-direction: column; gap: 15px; margin: 28px 0 26px; }
+        .sl-bk-heading h1 { font-size: clamp(46px, 12vw, 66px); }
+        .sl-bk-card { grid-template-columns: 1fr; gap: 16px; padding: 12px; }
+        .sl-bk-image { min-height: 200px; }
+        .sl-bk-body { padding: 0 6px 6px; }
+        .sl-bk-top { flex-direction: column; gap: 12px; }
+        .sl-bk-range { gap: 12px; padding: 14px 16px; }
+        .sl-bk-day strong { font-size: 26px; }
+        .sl-bk-bottom { gap: 18px; grid-template-columns: 1fr; }
+        .sl-bk-total { align-items: baseline; border-top: 1px solid var(--sl-line); display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: space-between; padding-top: 16px; text-align: left; }
+        .sl-bk-total-caption { flex-basis: 100%; margin-bottom: 0; }
+        .sl-bk-night-price { flex-basis: 100%; margin-bottom: 4px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .sl-bookings *, .sl-bookings *::before, .sl-bookings *::after {
+            animation-duration: .01ms !important;
+            scroll-behavior: auto !important;
+            transition-duration: .01ms !important;
+        }
+    }
+</style>
+
+<div class="sl-bookings">
+    <div class="sl-bk-shell">
+
+        <a href="{% url 'hotel' %}" class="sl-bk-back">
+            <span aria-hidden="true">←</span>
+            Повернутися до колекції
+        </a>
+
+        <header class="sl-bk-heading">
+            <div>
+                <div class="sl-bk-eyebrow">Your stays</div>
+                <h1>Мої<br><em>бронювання.</em></h1>
+            </div>
+            {% if bookings %}
+                <span class="sl-bk-count"><strong>{{ bookings|length }}</strong> {% if bookings|length == 1 %}бронювання{% else %}бронювань{% endif %}</span>
+            {% endif %}
+        </header>
+
+        <main class="sl-bk-list">
+            {% for b in bookings %}
+                <article
+                    class="sl-bk-card"
+                    data-checkin="{{ b.check_in_date|date:'Y-m-d' }}"
+                    data-checkout="{{ b.check_out_date|date:'Y-m-d' }}"
+                    data-price="{{ b.room.price_per_night|stringformat:'f' }}"
+                >
+                    <div class="sl-bk-image">
+                        {% with photo=b.room.images.first %}
+                            {% if photo %}
+                                <img src="{{ photo.image.url }}" alt="Номер {{ b.room.room_number }} — {{ b.hotel.name }}" loading="lazy">
+                            {% else %}
+                                {% with hotel_photo=b.hotel.images.first %}
+                                    {% if hotel_photo %}
+                                        <img src="{{ hotel_photo.image.url }}" alt="{{ b.hotel.name }}" loading="lazy">
+                                    {% else %}
+                                        <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=900&q=80" alt="Готель {{ b.hotel.name }}" loading="lazy">
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+                        {% endwith %}
+                        <span class="sl-bk-room-tag">№ {{ b.room.room_number }}</span>
+                    </div>
+
+                    <div class="sl-bk-body">
+                        <div class="sl-bk-top">
+                            <div>
+                                <div class="sl-bk-location">{{ b.hotel.city }}, {{ b.hotel.country }}</div>
+                                <h3>{{ b.hotel.name }}</h3>
+                                <p class="sl-bk-room-line">
+                                    Номер {{ b.room.room_number }} ·
+                                    {% if b.room.room_type == 'single' %}Одномісний номер
+                                    {% elif b.room.room_type == 'double' %}Двомісний номер
+                                    {% elif b.room.room_type == 'suite' %}Люкс
+                                    {% else %}{{ b.room.get_room_type_display }}{% endif %}
+                                </p>
+                            </div>
+                            <span class="sl-bk-status" data-status></span>
+                        </div>
+
+                        <div class="sl-bk-range">
+                            <div class="sl-bk-day">
+                                <small>Заїзд</small>
+                                <strong>{{ b.check_in_date|date:"d.m" }}</strong>
+                                <span>{{ b.check_in_date|date:"Y" }}</span>
+                            </div>
+                            <div class="sl-bk-nights">Ночей: <strong data-nights>{{ b.nights }}</strong></div>
+                            <div class="sl-bk-day">
+                                <small>Виїзд</small>
+                                <strong>{{ b.check_out_date|date:"d.m" }}</strong>
+                                <span>{{ b.check_out_date|date:"Y" }}</span>
+                            </div>
+                        </div>
+
+                        <div class="sl-bk-bottom">
+                            <dl class="sl-bk-guest">
+                                {% if b.name %}<div><dt>Гість</dt><dd>{{ b.name }}</dd></div>{% endif %}
+                                {% if b.phone %}<div><dt>Телефон</dt><dd>{{ b.phone }}</dd></div>{% endif %}
+                                {% if b.email %}<div><dt>Електронна пошта</dt><dd>{{ b.email }}</dd></div>{% endif %}
+                                <div><dt>Заброньовано</dt><dd>{{ b.created_at|date:"d.m.Y" }}</dd></div>
+                            </dl>
+
+                            <div class="sl-bk-total">
+                                <div class="sl-bk-night-price">
+                                    <span>Ціна за ніч</span>
+                                    <strong>{{ b.room.price_per_night|floatformat:"-2" }} грн</strong>
+                                </div>
+                                <span class="sl-bk-total-caption">Всього (<span data-nights>{{ b.nights }}</span> × {{ b.room.price_per_night|floatformat:"-2" }} грн)</span>
+                                <div class="sl-bk-total-price"><span data-total>{{ b.total_price|floatformat:"-2" }}</span> <small>грн</small></div>
+                            </div>
+                        </div>
+
+                        <form class="sl-bk-delete-form" method="post" action="{% url 'delete_booking' b.id %}" data-title="{{ b.hotel.name }}, номер {{ b.room.room_number }}">
+                            {% csrf_token %}
+                            <button type="submit" class="sl-bk-delete">Видалити бронювання</button>
+                        </form>
+                    </div>
+                </article>
+            {% empty %}
+                <div class="sl-bk-empty">
+                    <div class="sl-bk-eyebrow">Поки що тихо</div>
+                    <h3>Тут з’являться твої подорожі.</h3>
+                    <p>У тебе ще немає бронювань. Коли забронюєш номер, він одразу з’явиться тут.</p>
+                </div>
+            {% endfor %}
+        </main>
+
+    </div>
+</div>
+
+<dialog class="sl-bk-dialog" id="deleteDialog" aria-labelledby="deleteTitle">
+    <h3 id="deleteTitle">Видалити бронювання?</h3>
+    <p id="deleteText"></p>
+    <div class="sl-bk-dialog-actions">
+        <button type="button" class="sl-bk-dialog-keep" id="deleteKeep">Залишити</button>
+        <button type="button" class="sl-bk-dialog-confirm" id="deleteConfirm">Так, видалити</button>
+    </div>
+</dialog>
+
+<script>
+(function () {
+    // Позначає бронювання як майбутнє, поточне або завершене (за датою на пристрої користувача)
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    function parse(value) {
+        var p = (value || '').split('-');
+        return new Date(+p[0], +p[1] - 1, +p[2]);
+    }
+
+    document.querySelectorAll('.sl-bk-card').forEach(function (card) {
+        var checkIn = parse(card.dataset.checkin);
+        var checkOut = parse(card.dataset.checkout);
+        var badge = card.querySelector('[data-status]');
+        if (isNaN(checkIn) || isNaN(checkOut)) return;
+
+        // Ночі та сума: якщо сервер їх не передав, рахуємо тут
+        var nights = Math.max(Math.round((checkOut - checkIn) / 86400000), 1);
+        var total = Math.round(nights * parseFloat(card.dataset.price || '0') * 100) / 100;
+        card.querySelectorAll('[data-nights]').forEach(function (el) {
+            if (!el.textContent.trim()) el.textContent = nights;
+        });
+        card.querySelectorAll('[data-total]').forEach(function (el) {
+            if (!el.textContent.trim()) el.textContent = total.toLocaleString('uk-UA');
+        });
+
+        if (!badge) return;
+
+        if (today > checkOut) {
+            badge.textContent = 'Подорож завершена';
+            badge.classList.add('is-past');
+            card.classList.add('is-past');
+        } else if (today >= checkIn) {
+            badge.textContent = '● Ти зараз тут';
+            badge.classList.add('is-now');
+        } else {
+            var days = Math.round((checkIn - today) / 86400000);
+            badge.textContent = days === 1 ? 'Вже завтра' : 'Через ' + days + ' дн.';
+        }
+    });
+})();
+</script>
+<script>
+(function () {
+    // Підтвердження перед видаленням бронювання
+    var dialog = document.getElementById('deleteDialog');
+    if (!dialog || typeof dialog.showModal !== 'function') return;
+    var text = document.getElementById('deleteText');
+    var pending = null;
+
+    document.querySelectorAll('.sl-bk-delete-form').forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            pending = form;
+            text.textContent = form.dataset.title + '. Цю дію не можна скасувати.';
+            dialog.showModal();
+        });
+    });
+
+    document.getElementById('deleteKeep').addEventListener('click', function () {
+        pending = null;
+        dialog.close();
+    });
+    document.getElementById('deleteConfirm').addEventListener('click', function () {
+        if (pending) pending.submit();
+    });
+    dialog.addEventListener('click', function (e) {
+        if (e.target === dialog) dialog.close();
+    });
+})();
+</script>
+{% endblock %}

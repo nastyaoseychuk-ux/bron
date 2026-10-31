@@ -25,8 +25,11 @@
             <a class="sl-navbar-link" href="{% url 'hotel' %}#hotels">
                 Знайти свій простір
             </a>
-
             {% if user.is_authenticated %}
+                <a class="sl-navbar-link{% if request.resolver_match.url_name == 'my_bookings' %} active{% endif %}" href="{% url 'my_bookings' %}">
+                    Мої бронювання
+                </a>
+
                 <span class="sl-navbar-user" title="{{ user.get_username }}">
                     <span class="sl-navbar-avatar" aria-hidden="true">{{ user.get_username|first|upper }}</span>
                     <span class="sl-navbar-username">{{ user.get_username }}</span>
